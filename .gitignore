@@ -11,3 +11,4 @@ vignettes/*.pdf
 .Rproj.user
 weather_data_workspace.RData
 dept_time_sunrise.pdf
+weather.data.csv
