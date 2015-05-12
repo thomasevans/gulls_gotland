@@ -97,3 +97,15 @@ plot(rbind(time_since_sunrise.cos, time_since_sunrise.cos)~rbind(x3, x2))
 
 
 # Output data to dataframe -----
+# Put data together and give sensible column names
+out.tab <- cbind.data.frame(trips$trip_id, date_time_start_solar,
+                 am.pm, time_since_sunrise,  time_since_sunrise.cos)
+names(out.tab) <- c("trip_id", "date_time_start_solar",
+                    "time_of_day", "time_since_sunrise_h",
+                    "time_since_sunrise_cos")
+
+str(out.tab)
+
+# Output data frame (table)
+write.csv(out.tab, file = "time_of_day.data.csv", 
+          row.names = FALSE)
