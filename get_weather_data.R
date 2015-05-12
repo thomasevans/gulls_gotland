@@ -1,4 +1,7 @@
+# This script gets summaries for weather variables for foraging trips. We get a summary of the prior 24 hours for each foraging trip and time of departure.
 
+
+# Packages + data ----
 # Load required packages
 library("RNCEP")
 
@@ -23,11 +26,12 @@ sk_location <- NULL
 sk_location$long <- 17.97
 sk_location$lat  <- 57.28
 
-# i <- 1
-# For each flight do following
-# for(i in 1:length(trips$trip_id)){
+
+
+# Get weather data -------
+# WARNING - SLOW!
   
-# ?difftime  
+# 6 hour time difference, to be used to get data at 6h, 12h, and 18h before start point
 hours_6 <- as.difftime(6, units = "hours")
 
 
@@ -169,26 +173,50 @@ tcdc.eatm.18h <-    NCEP.interp("tcdc.eatm", "gaussian", sk_location$lat, sk_loc
 
 
 
-
-
-    
-  
-  
-    # t = 0
-  
-
-    
-    # t = -6 h
-
-    # t = -12 h
-
-    # t = -18 h
+# Summarise variables (mean/ sum) --------
 
   # Calculate mean/ sums for each variable
-# }
+
+
+tcdc.eatm.mean <- rowMeans(cbind(tcdc.eatm.0h, tcdc.eatm.6h,
+                                 tcdc.eatm.12h, tcdc.eatm.18h), na.rm = TRUE)
+
+prate.sfc.sum <-  rowSums(cbind(prate.sfc.0h, prate.sfc.6h,
+                                 prate.sfc.12h, prate.sfc.18h), na.rm = TRUE)
+
+air.2m.mean <-  rowMeans(cbind(air.2m.0h, air.2m.6h,
+                               air.2m.12h, air.2m.18h), na.rm = TRUE)
+
+
+vwnd.10m.mean <-   rowMeans(cbind(vwnd.10m.0h, vwnd.10m.6h,
+                                  vwnd.10m.12h, vwnd.10m.18h), na.rm = TRUE)
+
+uwnd.10m.mean <-   rowMeans(cbind(uwnd.10m.0h, uwnd.10m.6h,
+                                  uwnd.10m.12h, uwnd.10m.18h), na.rm = TRUE)
+
+# Convert from Kelvin to Celsius 
+air.2m.mean.c <- air.2m.mean - 273.15
+
+
+# Histograms of variables (to visualise distributions) ------
+hist(tcdc.eatm.mean)
+hist(prate.sfc.sum)
+hist(air.2m.mean.c)
+hist(vwnd.10m.mean)
+hist(uwnd.10m.mean)
+
+
+# Output data to new table (csv file) -------
 
 # Summarise to data frame
+weather.data <- cbind.data.frame(trips$trip_id,tcdc.eatm.mean,
+                                 prate.sfc.sum, air.2m.mean.c,
+                                 vwnd.10m.mean, uwnd.10m.mean)
+names(weather.data)[1] <- "trip_id"
+str(weather.data)
+
 
 # Output data frame (table)
-
+write.csv(weather.data, file = "weather.data.csv", 
+          row.names = FALSE)
 
