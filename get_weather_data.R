@@ -205,6 +205,10 @@ hist(air.2m.mean.c)
 hist(vwnd.10m.mean)
 hist(uwnd.10m.mean)
 
+# Rain per 24h (in mm)
+hist(prate.sfc.sum*6*60*60, breaks = 100)
+
+
 
 # Output data to new table (csv file) -------
 
