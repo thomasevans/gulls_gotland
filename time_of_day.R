@@ -74,6 +74,7 @@ range.fun.2 <- function(x){
 
 x2 <- sapply(time_since_sunrise, range.fun)
 x3 <- sapply(time_since_sunrise,range.fun.2)
+hist(time_since_sunrise)
 hist(x2)
 hist(x3)
 # hist(time_since_sunrise)
