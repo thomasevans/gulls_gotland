@@ -9,7 +9,7 @@ logi.hist.plot.edit <- function (independ, depend, logi.mod = 1, type = "dit", b
     plot(independ, depend, cex = 1, type = scater, ylab = ylabel, 
          xlab = x.lab, main = mainlabel, cex.lab = 1.2, las = las)
   }
-  logi.rug <- function(independ, depend, pch.rug = 16, cex.rug = 1) {
+  logi.rug <- function(independ, depend, pch.rug = "|", cex.rug = 0.6) {
     points(independ, depend, pch = pch.rug, cex = cex.rug)
   }
   logi.box <- function(independ, depend, col.box = "gray", 
@@ -26,7 +26,8 @@ logi.hist.plot.edit <- function (independ, depend, logi.mod = 1, type = "dit", b
   }
   if(line.fit == TRUE){
   logi.curve <- function(independ, depend, mod = logi.mod, 
-                         col.cur = "red", lwd.cur = 4) {
+                         col.cur = "black", lwd.cur = 2,
+                         lty.cur = 2) {
     if (mod == 1) 
       mod3 <- glm(depend ~ independ, family = binomial)
     if (mod == 2) 
@@ -34,7 +35,7 @@ logi.hist.plot.edit <- function (independ, depend, logi.mod = 1, type = "dit", b
     x.new <- seq(min(independ), max(independ), len = 100)
     y.new <- predict(mod3, data.frame(independ = x.new), 
                      type = "response")
-    lines(x.new, y.new, lwd = lwd.cur, col = col.cur)
+    lines(x.new, y.new, lwd = lwd.cur, lty = lty.cur, col = col.cur)
   }
   }
   logi.dit <- function(independ, depend, cex.p = 1, pch.dit = 1, 
