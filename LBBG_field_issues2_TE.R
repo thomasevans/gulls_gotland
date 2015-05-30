@@ -2,7 +2,7 @@
 
 # setwd("D:/Dropbox/LBBG_agriculture/R_gotland_gulls")
 
-load("LBBG_field_issues2.RData")
+load("D:/Dropbox/LBBG_agriculture/R_gotland_gulls/LBBG_field_issues2.RData")
 str(field)
 
 plot(field$cloud, field$air.temp, las = 1)
@@ -207,7 +207,7 @@ summary(mod.cover)
 summary(field2$veg.cover2)
 
 
-kappa()
+# kappa()
 
 
 
@@ -252,10 +252,12 @@ boxplot(field2$veg.height~field2$veg.cover2,
 ?plot
 
 
-s
+setwd("D:/Dropbox/R_projects/gulls_gotland")
 
 # Logistic plot thing ------
-install.packages("popbio")
+# install.packages("popbio")
+source("logi.hist.plot.edit.fun.R")
+
 library(popbio)
 logi.hist.plot(field2$veg.height, field2$LBBG, 
                boxp = FALSE, type = "hist", col = "gray",
@@ -263,7 +265,14 @@ logi.hist.plot(field2$veg.height, field2$LBBG,
 logi.hist.plot.edit(field2$veg.height, field2$LBBG, 
                     boxp = FALSE, type = "hist", col = "gray",
                     xlabel = "Vegetation height (cm)",
-                    line.fit = TRUE)
+                    line.fit = TRUE, rug = FALSE)
+
+
+# Fit out own line:
+x.new <- seq(min(field2$veg.height), max(field2$veg.height), len = 100)
+y.new <- predict(mod3, data.frame(independ = x.new), 
+                 type = "response")
+lines(x.new, y.new, lwd = lwd.cur, lty = lty.cur, col = col.cur)
 
 
 
@@ -277,6 +286,9 @@ mod.veg.height <-glmer(LBBG~veg.height
 
 summary(mod.veg.height)
 
+
+
+# PLOT FIGURE TO ILLUSTATE LOGISTIC MODEL --------
 # To draw out own curve do the following
 # Taking a tip from: http://stats.stackexchange.com/a/28650/35112
 # Install this package for function 'invlogit'
@@ -284,14 +296,24 @@ summary(mod.veg.height)
 library(arm)
 model.coefs <- fixef(mod.veg.height)
 
+
+
+
+win.metafile(filename = "veg_height_log_model.wmf", width = 7, height = 7, pointsize = 12)
+
 logi.hist.plot.edit(field2$veg.height, field2$LBBG, 
-               boxp = TRUE, type = "hist", col = "gray",
+               boxp = FALSE, type = "hist", col = "gray",
                xlabel = "Vegetation height (cm)",
-               line.fit = TRUE)
+               line.fit = FALSE)
 curve(invlogit( cbind(1, x) %*% model.coefs ), add = TRUE,
-       lwd = 2)
+       lwd = 3, lty = 2)
+
+dev.off()
 
 summary(mod.veg.height)
+
+
+
 
 
 # Veg.height vs cover correlation -----
@@ -457,3 +479,7 @@ r.squaredGLMM(mod.int)
 
 
 plot(LBBG ~ season + veg.height, data = field2)
+
+
+library("rptR")
+cite("rptR")
