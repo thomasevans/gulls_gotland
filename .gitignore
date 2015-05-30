@@ -15,3 +15,5 @@ weather.data.csv
 .RData
 GPS_LBBG1.RData
 time_of_day.wmf
+# Ignore wmf files
+*.wmf
