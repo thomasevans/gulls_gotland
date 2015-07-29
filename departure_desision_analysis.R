@@ -1,7 +1,15 @@
 
 
-trips <- read.csv("foraging_trip_info_filtered_may2015.csv",
+trips <- read.csv("foraging_trip_info_filtered_july2015.csv",
                   header = TRUE)
+
+
+
+
+
+
+
+
 
 str(trips)
 
