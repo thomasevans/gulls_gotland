@@ -14,7 +14,7 @@ help("RNCEP")
 # Weather data (we use 'NCEP-DOE Reanalysis 2', option 'reanalysis2 = TRUE')
 
 # Load trip data
-trips <- read.csv("foraging_trip_info_filtered_may2015_start_time_only.csv", header = TRUE)
+trips <- read.csv("foraging_trip_info_filtered_july2015_start_time_only.csv", header = TRUE)
 
 
 # Check date_time format
