@@ -2,7 +2,7 @@
 
 
 # Read in data ----
-trips <- read.csv("foraging_trip_info_filtered_may2015.csv", header = TRUE)
+trips <- read.csv("foraging_trip_info_filtered_july2015.csv", header = TRUE)
 str(trips)
 
 
@@ -62,8 +62,8 @@ win.metafile(filename = "time_of_day.wmf", width = 7, height = 7, pointsize = 12
 
 
 # Plot all trips first
-hist(all_trips, xlim = c(-4,20), ylim = c(0,120), breaks = 48, col='white',
-     border = TRUE, main = "", xlab = "Time sinse sunrise (h)",
+hist(all_trips, xlim = c(-4,20), xaxs = "i", ylim = c(0,120), breaks = 48, col='white',
+     border = TRUE, main = "", xlab = "Time since sunrise (h)",
      ylab = "N  foraging trips per hour",
      xaxt = "n",
      las = 1,
@@ -75,7 +75,8 @@ axis(1, at = seq(-4,20,2), labels = seq(-4,20,2), pos = 0,
      cex = 1.2)
 # ?axis
 # Of which Gotland trips
-hist(gotland_trips, xlim = c(-4,20), ylim = c(0,100), breaks = 48, col='grey',
+hist(gotland_trips,
+     breaks = 48, col='grey',
      border = TRUE, add = TRUE)
 
 
@@ -92,18 +93,38 @@ night.mean <- -6.565155023
 night.max <- -8.43
 night.min <- -6.03
 
+# rect(-23.9, 115, 24, 125, density = NULL, angle = 45,
+#      col = "grey 95", border = FALSE, lty = par("lty"), lwd = par("lwd"))
+# rect(0, 115, night.mean, 125, density = NULL, angle = 45,
+#      col = "black", border = FALSE, lty = par("lty"), lwd = par("lwd"))
+# rect(24, 115, 24 + night.max, 125, density = NULL, angle = 45,
+#      col = "grey 40", border = FALSE, lty = par("lty"), lwd = par("lwd"))
+# rect(24, 115, 24 + night.mean, 125, density = NULL, angle = 45,
+#      col = "grey 20", border = FALSE, lty = par("lty"), lwd = par("lwd"))
+# rect(24, 115, 24 + night.min, 125, density = NULL, angle = 45,
+#      col = "black", border = FALSE, lty = par("lty"), lwd = par("lwd"))
+# rect(-23.9, 115, 24, 125, density = NULL, angle = 45,
+#      col = NA, border = TRUE, lty = par("lty"), lwd = par("lwd"))
+
 rect(-23.9, 115, 24, 125, density = NULL, angle = 45,
      col = "grey 95", border = FALSE, lty = par("lty"), lwd = par("lwd"))
 rect(0, 115, night.mean, 125, density = NULL, angle = 45,
      col = "black", border = FALSE, lty = par("lty"), lwd = par("lwd"))
 rect(24, 115, 24 + night.max, 125, density = NULL, angle = 45,
-     col = "grey 40", border = FALSE, lty = par("lty"), lwd = par("lwd"))
-rect(24, 115, 24 + night.mean, 125, density = NULL, angle = 45,
-     col = "grey 20", border = FALSE, lty = par("lty"), lwd = par("lwd"))
-rect(24, 115, 24 + night.min, 125, density = NULL, angle = 45,
      col = "black", border = FALSE, lty = par("lty"), lwd = par("lwd"))
-rect(-23.9, 115, 24, 125, density = NULL, angle = 45,
-     col = NA, border = TRUE, lty = par("lty"), lwd = par("lwd"))
+rect( 24 + night.min, 115, 24 + night.max, 125, density = NULL, angle = 45,
+      col = "grey 40", border = FALSE, lty = par("lty"), lwd = par("lwd"))
+
+
+# Add sun symbol
+# U+263C
+# ?text
+
+# text(x = 12, y = 120, labels = "☼", adj = NULL,
+#      pos = NULL, offset = 0.5, vfont = NULL,
+#      cex = 2, col = NULL, font = 3)
+
+
 
 
 
