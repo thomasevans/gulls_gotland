@@ -17,3 +17,9 @@ GPS_LBBG1.RData
 time_of_day.wmf
 # Ignore wmf files
 *.wmf
+L. f. fuscus range.kml
+*.csv
+*.xlsx
+*.png
+*.pdf
+*.RData
