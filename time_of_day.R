@@ -1,13 +1,13 @@
 # This script calculates time since sunrise, and calculates a variable based on that, plus specifies whether a trip is morning or afternoon (UTC).
 
-
+getwd()
 # Packages + data ----
 # install.packages("solaR")
 library("solaR")
 
 
 # Load trip data
-trips <- read.csv("foraging_trip_info_filtered_may2015_start_time_sunrise_only.csv", header = TRUE)
+trips <- read.csv("foraging_trip_info_filtered_july2015_start_time_sunrise_only.csv", header = TRUE)
 
 
 # Check date_time format
@@ -85,8 +85,8 @@ hist(rbind(x3, x2), xlim = c(-24,24), breaks = 48,
      xaxt = "n")
 axis(1, at = seq(-24, 24, by = 4), las = 1)
 dev.off()
-
-
+# 
+# getwd()
 # Calculate cos thing
 time_since_sunrise.cos <-  (cos(pi*time_since_sunrise/12))
 
