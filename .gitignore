@@ -23,3 +23,5 @@ L. f. fuscus range.kml
 *.png
 *.pdf
 *.RData
+*.data.csv
+time_of_day.data.csv
