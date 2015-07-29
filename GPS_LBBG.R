@@ -68,6 +68,8 @@ time.since.sunrise.cos <-  (cos(pi*hours.since.sunrise/12))
 # use 'prate_sfc_day_kg_m2'is the same as mm, its a total rainfall in previous 24 hr
 # 'air_2m_mean_c' is in celsius, a mean from previous 24 hr
 
+trips<-foraging_trip_info_filtered_may2015
+
 trips$ring_number<-as.factor(trips$ring_number)
 trips$trip_id<-as.factor(trips$trip_id)
 str(trips)
@@ -153,8 +155,6 @@ model.set<-dredge(stdz.model)
 
 summary(is.na(trips_f))
 
-
-
 mod.2<-glmer(gotland_on~
             time_since_sunrise_cos
             +month
@@ -166,7 +166,7 @@ mod.2<-glmer(gotland_on~
             +windNS
             +windEW
             +temp*month
-            +(1|ring_number),family = binomial, data=trips_f) 
+            +(1|ring_number),family=binomial, data=trips_f) 
 summary(mod.2)
 
 mod.3<- glmer(gotland_on~
@@ -193,147 +193,110 @@ cloud_arcsine <- trans.arcsine(trips$cloud)
 # See how the transformed cloud data looks:
 hist(cloud_arcsine)
 
+#####the table method or 'problem of too many models' method####
+mod.1<- glmer(gotland_on~ month+cloud+temp+ppt+ time_since_sunrise_cos +year +windNS+windEW+sex+temp*month+windNS*windEW+(1|ring_number),family=binomial, data=trips_f)
+mod.2<- glmer(gotland_on~ month+cloud+temp+ppt+ time_since_sunrise_cos +year +windNS+windEW+sex+temp*month+( 1|ring_number),family=binomial, data=trips_f)
+mod.3<- glmer(gotland_on~ month+cloud+temp+ppt+ time_since_sunrise_cos +year +windNS+windEW+sex+( 1|ring_number),family=binomial, data=trips_f)
+mod.4<- glmer(gotland_on~ month+cloud+temp+ppt+ time_since_sunrise_cos +year +windNS+windEW+( 1|ring_number),family=binomial, data=trips_f)
+mod.5<- glmer(gotland_on~ month+cloud+temp+ppt+ time_since_sunrise_cos +year +( 1|ring_number),family=binomial, data=trips_f)
+mod.6<- glmer(gotland_on~ month+cloud+temp+ppt+ time_since_sunrise_cos +( 1|ring_number),family=binomial, data=trips_f)
+mod.7<- glmer(gotland_on~ month+cloud+temp+ppt+ ( 1|ring_number),family=binomial, data=trips_f)
+mod.8<- glmer(gotland_on~ month+cloud+temp+ppt+temp*month+ ( 1|ring_number),family=binomial, data=trips_f)
+mod.9 <-glmer(gotland_on~ month+cloud+temp+ppt+ time_since_sunrise_cos +year +temp*month+( 1|ring_number),family=binomial, data=trips_f)
+mod.10<-glmer(gotland_on~ month+cloud+temp+ppt+ time_since_sunrise_cos +temp*month+( 1|ring_number),family=binomial, data=trips_f)
+mod.int<-glmer(gotland_on~( 1|ring_number),family=binomial, data=trips_f)
 
+anova(mod.1, mod.2, mod.3, mod.4, mod.5, mod.6, mod.7, mod.8, mod.9, mod.10, mod.int)
 
+aic.val <- AICc(mod.1, mod.2, mod.3, mod.4, mod.5, mod.6, mod.7, mod.8, mod.9, mod.10, mod.int)
+str(aic.val)
+aic.val$dAICc <- aic.val$AICc - aic.val$AICc[9]
+aic.val
 
-# Individuality -----
+r1<-r.squaredGLMM(mod.1)
+r2<-r.squaredGLMM(mod.2)
+r3<-r.squaredGLMM(mod.3)
+r4<-r.squaredGLMM(mod.4)
+r5<-r.squaredGLMM(mod.5)
+r6<-r.squaredGLMM(mod.6)
+r7<-r.squaredGLMM(mod.7)
+r8<-r.squaredGLMM(mod.8)
+r9<-r.squaredGLMM(mod.9)
+r9.0<-r.squaredGLMM(stdz.model9)
+r10<-r.squaredGLMM(mod.10)
+rint<-r.squaredGLMM(mod.int)
 
-# SD for random effect
-VarCorr(stdz.model9)
+r9
+r9.0
+r1
+r2
+r3
+r4
+r5
+r6
+r7
+r8
+r9
+r10
+rint
 
-# Variance for random effect
-print(VarCorr(stdz.model9), comp = "Variance")
+drop1(stdz.model9, test="Chi")
 
-# Variance and sd
-as.data.frame(VarCorr(stdz.model9))
-
-
-
-unclass(VarCorr(stdz.model9))
-
-
+stdz.model9<-standardize(mod.9, standardize.y=FALSE)
 summary(stdz.model9)
 
-# library("arm")
+library(sjPlot)
+library(Rcpp)
+sjp.glmer(stdz.model9)
+install.packages("Rcpp", type = "source")
 
-fixef(stdz.model9)
+######plotting month v season#####
 
-se.fixef(stdz.model9)
+table(trips_f$gotland_on, trips_f$year, trips_f$month)
+monthyear<-matrix(c(61.8, 26.7, 17.2, 55.3,30.7, 13.2, 87.7, 21.2, 5.1), ncol=3, byrow=TRUE)
+rownames(monthyear)<-c("2011", "2012", "2013")
+colnames(monthyear)<-c("May", "June", "July")
+monthyear<-as.table(monthyear)
+monthyear
 
-?se.fixef
+barplot(monthyear, xlab="Month", ylab="Gotland trips as % of total trips", ylim=c(0,100), 
+        col=c("gray1", "gray47", "gray87"), beside=TRUE,
+        names.arg=c("May", "June", "July"), axes=FALSE, cex.names=0.9)
+axis(1, at = c(2.5,6.5,10.5), labels = FALSE)
+axis(2, at=seq(0,100,10), cex.axis=0.9, las=1)
+legend("topright", c("2011", "2012", "2013"), cex=0.8, col=c("gray1", "gray47", "gray87"), 
+       fill=c("gray1", "gray47", "gray87"),
+       bty="n")
 
+#####plotting abiotics#####
+library(sciplot)
+str(trips_f)
 
-se.ranef(stdz.model9)
+plot(trips_f$gotland_on~ trips_f$ppt_100)
 
-plot(stdz.model9)
+bargraph.CI(gotland_on, ppt_100,ylim=c(0,150),xlim=c(0,2.5),
+            ylab="Precipitation (mm)", xlab="Gotland trips", 
+            las=1, space= 0.4, width= 0.8, names.arg=c("False", "True"), data=trips_f)
 
+plot(trips_f$gotland_on~trips_f$cloud)
+bargraph.CI(gotland_on, cloud,ylim=c(0,50),xlim=c(0,2.5),
+            ylab="Cloud cover (%)", xlab="Gotland trips", 
+            las=1, space= 0.4, width= 0.8, names.arg=c("False", "True"), data=trips_f)
 
-install.packages("rptR")
-
-
-library("rptR")
-
-
-install.packages("rptR", repos = "http://R-Forge.R-project.org", type = "source")
-# ?install.packages
-
-install.packages("VGAM")
-install.packages("MCMCglmm")
-install.packages("rptR", repos = "http://R-Forge.R-project.org", type = "source")
-
-
-
-library("rptR")
-?rpt.binomGLMM.multi
-
-rpt.binomGLMM.multi(trips_f$gotland_on, )
-
-gotland_yn <- trips_f$gotland_on*1
-
-trips_f <- cbind(trips_f, gotland_yn)
-
-rpt.thing <- rpt.binomGLMM.multi(gotland_yn, trips_f$ring_number, link=c("logit"))
-rpt.thing.add <- rpt.binomGLMM.add(gotland_yn, trips_f$ring_number)
-
-
-
-# summary(as.factor(gotland_yn))
-
-rpt.thing
-rpt.thing.add
-
-may <- trips_f$month == "5"
-# summary(may)
-rpt.thing.may <- rpt.binomGLMM.multi(gotland_yn[may], trips_f$ring_number[may], link=c("logit"))
-rpt.thing.may
-
-
-june <- trips_f$month == "6"
-summary(june)
-rpt.thing.june <- rpt.binomGLMM.multi(gotland_yn[june], trips_f$ring_number[june], link=c("logit"))
-rpt.thing.june
-
-
-july <- trips_f$month == "7"
-summary(july)
-rpt.thing.july <- rpt.binomGLMM.multi(gotland_yn[july], trips_f$ring_number[july], link=c("logit"))
-rpt.thing.july
+plot(trips_f$gotland_on~trips_f$temp)
+bargraph.CI(gotland_on, temp,ylim=c(0,16),xlim=c(0,2.5),
+            ylab="Air temperature (Celsius)", xlab="Gotland trips", 
+            las=1, space= 0.4, width= 0.8, names.arg=c("False", "True"), data=trips_f)
 
 
 
-y2013 <- trips_f$year == 2013
-summary(y2013)
-rpt.thing.2013 <- rpt.binomGLMM.multi(gotland_yn[y2013], trips_f$ring_number[y2013], link=c("logit"))
-rpt.thing.2013
+LBBG=field$LBBG
+veg.height=field$veg.height
+library(sciplot)
+?bargraph.CI
+?barplot
+bargraph.CI(LBBG, veg.height,ylim=c(0,50), 
+            ylab="Vegetation height (cm)", xlab="LBBG absence/presence", 
+            las=1, yaxs="r", data=field)
 
 
-
-
-print(rpt.thing)
-
-
-
-
-
-
-
-# vignette("rptR")
-
-trips_f <- cbind(trips_f, gotland_yn)
-# 
-# 
-# summary(stdz.model9)
-# 
-# 
-# gotland_on ~ month + z.cloud + z.temp + z.ppt + z.time_since_sunrise_cos +  
-#   year + z.temp * month + (1 | ring_number)
-# 
-# rpt.thing.adj <- rpt.adj (gotland_yn ~   
-#                             year + month + (1 | ring_number), ring_number, trips_f,
-#          datatype = "binomial",  
-#          method = "GLMM.multi",  
-#          link = "logit",
-#          CI = 0.95, nboot = 100, npermut = 100) 
-# 
-# rpt.thing.adj <- rpt.adj (gotland_yn ~   (1 | ring_number), "ring_number", trips_f,
-#                           datatype = "binomial",  
-#                           method = "GLMM.multi") 
-# 
-# 
-# data(Fledglings)
-# Fledglings$sqrtFledge <- sqrt(Fledglings$Fledge)
-# rpt.Fledge <- rpt.adj(sqrtFledge ~ Age + (1|MaleID), "MaleID", data=Fledglings, datatype="Gaussian", 
-#                       method="REML", nboot=10, npermut=10)
-# source("MyOwnAdjRpt.r")
-# rpt.Fledge <- MyOwnAdjRpt(sqrtFledge ~ Age + (1|MaleID), "MaleID", data=Fledglings, datatype="Gaussian", 
-#                       method="REML", nboot=10, npermut=10)
-# 
-# 
-# rpt.adj
-# 
-# 
-# 
-# rpt.adj
-# 
-# 
-# ?rpt.adj
