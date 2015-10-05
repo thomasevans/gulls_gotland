@@ -64,10 +64,12 @@ while(count < 11){
 sea_10
 #  [1]  256  744 1013  538  169 1209  904  773  397   31
 # [1] "511"  "2410" "370"  "2734" "2502" "347"  "3117" "2651" "642"  "1419"
+# [1] "3311" "2559" "2371" "3272" "370"  "2721" "1659" "195"  "2094" "2284"
 
 land_10
 #  [1]  579  259  738 1030  542  192  912  774  367   48
 # [1] "2475" "2824" "2587" "346"  "648"  "1386" "267"  "1987" "1611" "2929"
+# [1] "2587" "3259" "2841" "1524" "165"  "2126" "2239" "2457" "972"  "354" 
 
 
 # Select 10 land based -----
@@ -158,9 +160,15 @@ col.vec.al.rand <- col.vec.al[sample(seq_along(col.vec.al))]
 
 
 # Plot all land trips -------
-resa = 72*4
-png("trips_land_test.png", res = resa, width = 8*resa, height = 8*resa)
+resa = 300
+png("trips_land_test2.png", res = resa, width = 8*resa, height = 8*resa)
+pdf("trips_land_test2.pdf", width = 8, height = 8)
+
 # ?png
+# win.metafile(filename = "trips_land_test2.wmf", width = 7,
+             # height = 7, pointsize = 12)
+
+
 # i <- 12
 gps.s <- gps[gps$trip_id %in% land_10,]
 
@@ -197,8 +205,13 @@ dev.off()
 
 
 # Plot all sea trips -------
-resa = 72*4
-png("trips_sea_test.png", res = resa, width = 8*resa, height = 8*resa)
+resa = 300
+png("trips_sea_test2.png", res = resa, width = 8*resa, height = 8*resa)
+pdf("trips_sea_test2.pdf", width = 8, height = 8)
+# 
+# win.metafile(filename = "trips_sea_test2.wmf", width = 7,
+#              height = 7, pointsize = 12)
+# wmf("trips_sea_test2.wmf")
 # ?png
 # i <- 12
 gps.s <- gps[gps$trip_id %in% sea_10,]
@@ -242,5 +255,5 @@ names(x)[50] <- "type"
 names(y)[50] <- "type"
 trips_f_map <- rbind.data.frame(x,y)
 
-write.table(trips_f_map, file = "mapped_trips.csv",
+write.table(trips_f_map, file = "mapped_trips2.csv",
             sep = ",")
