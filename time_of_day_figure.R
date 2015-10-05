@@ -10,7 +10,7 @@ str(trips)
 f <- (trips$ring_number != 8114317) & (trips$ring_number != 8114320)
 summary(f)
 trips_f <- trips[f,]
-
+trips_f <- trips
 # Prepare data for histogram -----
 # Time before
 range.fun <- function(x){
@@ -156,3 +156,26 @@ lines(p_got_perc2~h2, lwd = 1.5, lty = 2)
 # Make it a bit prettier
 # box()
 dev.off()
+
+
+
+
+# Output csv file of data
+gotland_on <- rep(FALSE,length(trips$gotland_time_prop))
+gotland_on[trips$gotland_time_prop > 0.2] <- TRUE
+trips$gotland_on <- gotland_on
+
+# Included in analysis
+not_included <- (trips$ring_number == "8114317") |
+  (trips$ring_number == "8114320") |
+  (trips$ring_number == "8114321") |
+  (trips$ring_number == "8114312")
+summary(not_included)
+included <- !not_included
+summary(included)
+
+# Output table
+out.tab <- cbind(trips,included)
+names(out.tab)
+?write.csv
+write.csv(out.tab, file = "trip_info.csv")

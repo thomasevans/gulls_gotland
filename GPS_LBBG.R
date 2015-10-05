@@ -1,6 +1,11 @@
 #Import file 'trips.txt'. It has been filtered etc for more info see 'Foraging_decision_LBBG.R'
 #first sort out the factors
 
+
+# Not sure this is the latest version - but anyway...:
+load("GPS_LBBG1.Rdata")
+
+
 str(trips)
 
 trips$gotland_fac<-as.factor(trips$gotland_fac)
@@ -206,12 +211,26 @@ mod.9 <-glmer(gotland_on~ month+cloud+temp+ppt+ time_since_sunrise_cos +year +te
 mod.10<-glmer(gotland_on~ month+cloud+temp+ppt+ time_since_sunrise_cos +temp*month+( 1|ring_number),family=binomial, data=trips_f)
 mod.int<-glmer(gotland_on~( 1|ring_number),family=binomial, data=trips_f)
 
+summary(mod.int)
+
 anova(mod.1, mod.2, mod.3, mod.4, mod.5, mod.6, mod.7, mod.8, mod.9, mod.10, mod.int)
+
+mod.9_no_inter <-glmer(gotland_on~ month+cloud+temp+ppt+ time_since_sunrise_cos +year +temp+month+( 1|ring_number),family=binomial, data=trips_f)
+anova(mod.9, mod.9_no_inter)
+
+mod.9_sex <-glmer(gotland_on~ month+cloud+temp+ppt+ time_since_sunrise_cos +year +temp+month+ sex + ( 1|ring_number),family=binomial, data=trips_f)
+anova(mod.9, mod.9_sex)
 
 aic.val <- AICc(mod.1, mod.2, mod.3, mod.4, mod.5, mod.6, mod.7, mod.8, mod.9, mod.10, mod.int)
 str(aic.val)
 aic.val$dAICc <- aic.val$AICc - aic.val$AICc[9]
 aic.val
+
+mod.int <- glmer(gotland_on ~ (1|ring_number),family=binomial, data=trips_f)
+rint<-r.squaredGLMM(mod.int)
+AICc(mod.int) - 925.7
+
+
 
 r1<-r.squaredGLMM(mod.1)
 r2<-r.squaredGLMM(mod.2)
@@ -221,10 +240,27 @@ r5<-r.squaredGLMM(mod.5)
 r6<-r.squaredGLMM(mod.6)
 r7<-r.squaredGLMM(mod.7)
 r8<-r.squaredGLMM(mod.8)
-r9<-r.squaredGLMM(mod.9)
+r9<-r.squaredGLMM(mod.9)
 r9.0<-r.squaredGLMM(stdz.model9)
 r10<-r.squaredGLMM(mod.10)
 rint<-r.squaredGLMM(mod.int)
+
+
+# Re-run using alternative function
+source("rsquaredglmm.R")
+
+r1.new <- rsquared.glmm(mod.1)
+r2.new <- rsquared.glmm(mod.2)
+r3.new <- rsquared.glmm(mod.3)
+r4.new <- rsquared.glmm(mod.4)
+r5.new <- rsquared.glmm(mod.5)
+r6.new <- rsquared.glmm(mod.6)
+r7.new <- rsquared.glmm(mod.7)
+r8.new <- rsquared.glmm(mod.8)
+r9.new <- rsquared.glmm(mod.9)
+r9.0.new <- rsquared.glmm(stdz.model9)
+r10.new <- rsquared.glmm(mod.10)
+rint.new <- rsquared.glmm(mod.int)
 
 r9
 r9.0
@@ -241,9 +277,116 @@ r10
 rint
 
 drop1(stdz.model9, test="Chi")
+?drop1
+r.squaredGLMM(stdz.model9)
+
+# For reference a copy of the original model
+# mod.9 <-glmer(gotland_on~ month+cloud+temp+ppt+ time_since_sunrise_cos +year +temp*month+( 1|ring_number),family=binomial, data=trips_f)
 
 stdz.model9<-standardize(mod.9, standardize.y=FALSE)
 summary(stdz.model9)
+
+?standardize
+?rescale
+
+str(stdz.model9)
+stdz.model9.ci.Wald <- confint(stdz.model9, method="Wald")
+# warnings()
+plot(stdz.model9.ci.Wald)
+
+
+
+# From http://www.ashander.info/posts/2015/04/D-RUG-mixed-effects-viz/
+ci_dat <-stdz.model9.ci.Wald
+ci_dat <- cbind(ci_dat, mean=rowMeans(ci_dat))
+ci_df <- data.frame(coef=row.names(ci_dat), ci_dat)
+names(ci_df)[2:3] <- c('lwr', 'upr')
+ci_df$coef_new <- c("(intercept)", "June", "July",
+          "Cloud", "Temperature", "Precipitation",
+          "Time since sunrise (cosine)",
+          "2012", "2013", "June:Temperature",
+          "July:Temperature")
+
+
+ci_df_sort <- ci_df[c(1,8,9,2,3,7,4,6,5,10,11),]
+ci_df_sort$coef_new <- factor(ci_df_sort$coef_new, levels = unique(ci_df_sort$coef_new))
+
+
+
+# ci_df
+ci_df_sort <- ci_df[c(11,1,2,3,8,5,7,10,9,4,6),]
+
+ci_df$coef_new <- factor(ci_df$coef_new, levels = unique(ci_df$coef_new))
+
+library(lattice)
+win.metafile("model_gps.wmf", width = 8, height = 12)
+
+dpi <- 300
+png("model_gps.png",  width = 8*dpi, height = 9*dpi, res = dpi)
+
+
+# lattice::dotplot(coef_new ~ mean, ci_df_sort)
+
+
+lattice::dotplot(coef_new ~ mean, ci_df_sort, xlim = c(-5,5),
+#                  cexl.lab = 1.5, cex.axis = 1.5,
+                 xlab = list("Effect (log-odds of terrestrial trip)",cex=1.3),
+                 panel = function(x, y) {
+                   panel.segments(ci_df_sort$lwr, y, ci_df_sort$upr, y, lwd =2)
+                   panel.xyplot(x, y, pch=18, cex = 1.2, col = "black")
+                   panel.abline(v=0, lty=2)
+                 },scales=list(y=list(cex=1.2), x = list(cex = 1.2))
+)
+# ?dotplot
+dev.off()
+# getwd()
+
+summary(as.factor(trips_f$gotland_on))
+385/1209
+ter <- trips_f$gotland_on == TRUE
+mar <- trips_f$gotland_on == FALSE
+
+pdf("weather_variables_gps.pdf")
+par(mfrow=c(2,2))
+hist(trips_f$cloud[ter])
+hist(rescale(trips_f$cloud[ter]))
+hist(trips_f$cloud[mar])
+hist(rescale(trips_f$cloud[mar]))
+
+par(mfrow=c(2,2))
+hist(trips_f$temp[ter])
+hist(rescale(trips_f$temp[ter]))
+hist(trips_f$temp[mar])
+hist(rescale(trips_f$temp[mar]))
+
+par(mfrow=c(2,2))
+hist(trips_f$ppt[ter])
+hist(rescale(trips_f$ppt[ter]))
+hist(trips_f$ppt[mar])
+hist(rescale(trips_f$ppt[mar]))
+
+par(mfrow=c(2,2))
+hist(trips_f$time_since_sunrise_cos[ter])
+hist(rescale(trips_f$time_since_sunrise_cos[ter]))
+hist(trips_f$time_since_sunrise_cos[mar])
+hist(rescale(trips_f$time_since_sunrise_cos[mar]))
+
+dev.off()
+
+pdf("weather_etc_gps_variables.pdf")
+par(mfrow=c(2,4))
+hist(trips_f$cloud[ter], xlim = c(0,100))
+hist(trips_f$temp[ter], xlim = c(0,20))
+hist(log(trips_f$ppt[ter]+0.0001))
+hist(trips_f$time_since_sunrise_cos[ter])
+
+hist(trips_f$cloud[mar], xlim = c(0,100))
+hist(trips_f$temp[mar], xlim = c(0,20))
+hist(log(trips_f$ppt[mar]+0.0001))
+hist(trips_f$time_since_sunrise_cos[mar])
+
+dev.off()
+
 
 library(sjPlot)
 library(Rcpp)
@@ -269,14 +412,17 @@ legend("topright", c("2011", "2012", "2013"), cex=0.8, col=c("gray1", "gray47", 
        bty="n")
 
 #####plotting abiotics#####
+install.packages("sciplot")
 library(sciplot)
 str(trips_f)
 
 plot(trips_f$gotland_on~ trips_f$ppt_100)
 
-bargraph.CI(gotland_on, ppt_100,ylim=c(0,150),xlim=c(0,2.5),
+bargraph.CI(gotland_on, ppt,ylim=c(0,4),xlim=c(0,2.5),
             ylab="Precipitation (mm)", xlab="Gotland trips", 
             las=1, space= 0.4, width= 0.8, names.arg=c("False", "True"), data=trips_f)
+?bargraph.CI
+
 
 plot(trips_f$gotland_on~trips_f$cloud)
 bargraph.CI(gotland_on, cloud,ylim=c(0,50),xlim=c(0,2.5),
@@ -289,6 +435,25 @@ bargraph.CI(gotland_on, temp,ylim=c(0,16),xlim=c(0,2.5),
             las=1, space= 0.4, width= 0.8, names.arg=c("False", "True"), data=trips_f)
 
 
+# Playing with some other ideas for plots
+boxplot(log(trips_f$ppt+0.001) ~ as.numeric(trips_f$gotland_on),
+         ylab="Precipitation (mm)", xlab="Gotland trips")
+
+
+?drop1
+
+
+# New version of weather GPS plots
+
+bargraph.CI(gotland_on, ppt,
+            ylab="Precipitation (mm)", xlab="Foraging trip type", 
+            las=1, space= 0.4, width= 0.8,
+            ylim = c(0.5,1.4),
+            cex = 1.2, cex.lab = 1.3, cex.axis = 1.1, cex.leg = 1.2,
+            names.arg = c("Marine", "Terrestrial"),
+            data = trips_f)
+box()
+
 
 LBBG=field$LBBG
 veg.height=field$veg.height
@@ -298,5 +463,8 @@ library(sciplot)
 bargraph.CI(LBBG, veg.height,ylim=c(0,50), 
             ylab="Vegetation height (cm)", xlab="LBBG absence/presence", 
             las=1, yaxs="r", data=field)
+
+
+
 
 

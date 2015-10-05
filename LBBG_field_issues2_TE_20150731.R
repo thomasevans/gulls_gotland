@@ -24,6 +24,13 @@ field$day<-as.factor(field$day)
 field$season<-as.factor(field$season)
 field$wind.dir4<-as.factor(field$wind.dir4)
 
+field2$crop3_fac <- (as.factor(field2$crop3))
+
+field2$veg.cover2_ord <- as.ordered(field2$veg.cover2)
+
+# summary(field$crop2)
+
+
 str(field)
 
 # hist(field$wind.NS)
@@ -63,7 +70,7 @@ anova(mod.1)
 
 
 
-
+# str(field2$waders)
 # Waders ----
 mod.waders<-glmer(LBBG ~ waders
              +(1|Transect/Field), family=binomial, data=field2)
@@ -86,15 +93,17 @@ confint(mod.waders)
 mod.gulls<-glmer(LBBG ~ gulls
                   +(1|Transect/Field), family=binomial, data=field2)
 
+str(field2$gulls)
+
 summary(mod.gulls)
 confint(mod.gulls)
 
 plot(mod.gulls)
-plot(field2$LBBG  ~ field2$gulls)
+plot(jitter(field2$LBBG, amount = 0.1)  ~ field2$gulls)
 
 
 
-
+?jitter
 
 
 
@@ -167,14 +176,14 @@ mod.7<-glmer(LBBG~crop2+veg.height+veg.cover
              +(1|Transect/Field), family=binomial, data=field2)
 summary(mod.7)
 
-field2$crop3_fac <- (as.factor(field2$crop3))
-
-field2$veg.cover2_ord <- as.ordered(field2$veg.cover2)
 
 #model8: F
 mod.8<-glmer(LBBG~crop3_fac +veg.height+veg.cover2_ord
              +(1|Transect/Field), family = binomial, data = field2)
 summary(mod.8)
+drop1(mod.8, test = "Chisq")
+
+
 
 mod.8_int <-glmer(LBBG~crop3+veg.height+veg.cover
                   +(1|Transect/Field), family=binomial, data=field2)
@@ -213,6 +222,7 @@ summary(field2$veg.cover2)
 
 
 LBBG.new <- as.logical(field2$LBBG)
+
 field2 <- cbind(field2,LBBG.new)
 
 library(reshape2)
@@ -230,6 +240,8 @@ mod.8_int <-glmer(LBBG~crop3+veg.height+veg.cover2
                   +(1|Transect/Field), family=binomial, data=field2)
 summary(mod.8_int)
 
+drop1(mod.8_int, test = "Chisq")
+# ?drop1
 test <- step(mod.8_int)
 
 coef(mod.8_int)
@@ -299,11 +311,13 @@ model.coefs <- fixef(mod.veg.height)
 
 
 
-win.metafile(filename = "veg_height_log_model.wmf", width = 7, height = 7, pointsize = 12)
+win.metafile(filename = "veg_height_log_model.wmf", width = 5, height = 4, pointsize = 12)
 
 logi.hist.plot.edit(field2$veg.height, field2$LBBG, 
                boxp = FALSE, type = "hist", col = "gray",
                xlabel = "Vegetation height (cm)",
+               ylabel = expression(Probability~of~italic(L.~fuscus)~presence),
+               ylabel2 = "N fields",
                line.fit = FALSE)
 curve(invlogit( cbind(1, x) %*% model.coefs ), add = TRUE,
        lwd = 3, lty = 2)
@@ -335,7 +349,7 @@ boxplot(mid.veg.height~mid.veg.cover)
 mid.crop.type <- field2$crop3[f]
 
 # One-way ANOVA
-mod.crop.height <- aov(mid.veg.height ~ mid.crop.type)
+mod.crop.height <- aov(mid.veg.height ~ as.factor(mid.crop.type))
 summary(mod.crop.height)
 plot(mod.crop.height)
 
@@ -483,3 +497,85 @@ plot(LBBG ~ season + veg.height, data = field2)
 
 library("rptR")
 cite("rptR")
+
+
+
+
+
+
+# NEW - Vegetation only
+
+# Check variable structure:
+str(field2$crop3_fac)
+str(field2$veg.height)
+str(field2$veg.cover2)
+
+mod.veg.1 <-glmer(LBBG~crop3_fac +
+                  + veg.height*veg.cover2
+             +(1|Transect/Field), family = binomial, data = field2)
+
+
+mod.veg.2 <-glmer(LBBG ~ crop3_fac +
+                    + veg.height + veg.cover2
+                  +(1|Transect/Field), family = binomial, data = field2)
+
+mod.veg.3 <-glmer(LBBG ~
+                    veg.height + crop3_fac
+                  +(1|Transect/Field), family = binomial, data = field2)
+
+mod.veg.4 <-glmer(LBBG ~ crop3_fac +
+                    + veg.height 
+                  +(1|Transect/Field), family = binomial, data = field2)
+
+mod.veg.5 <-glmer(LBBG ~ crop3_fac 
+                    + veg.cover2 
+                  +(1|Transect/Field), family = binomial, data = field2)
+
+mod.veg.6 <-glmer(LBBG ~ veg.cover2 +
+                    + veg.height
+                  +(1|Transect/Field), family = binomial, data = field2)
+
+mod.veg.7 <-glmer(LBBG ~ crop3_fac 
+                    +(1|Transect/Field), family = binomial, data = field2)
+
+mod.veg.8 <-glmer(LBBG ~ veg.height
+                  +(1|Transect/Field), family = binomial, data = field2)
+
+mod.veg.9 <-glmer(LBBG ~ veg.cover2
+                  +(1|Transect/Field), family = binomial, data = field2)
+
+mod.veg.null <-glmer(LBBG ~ (1|Transect/Field), family = binomial, data = field2)
+
+
+anova(mod.veg.1,mod.veg.2,mod.veg.3,mod.veg.4,
+      mod.veg.5,mod.veg.6,mod.veg.7,
+      mod.veg.8,mod.veg.9,mod.veg.null)
+AICc(mod.veg.1,mod.veg.2,mod.veg.3,mod.veg.4,
+     mod.veg.5,mod.veg.6,mod.veg.7,
+     mod.veg.8,mod.veg.9,mod.veg.null)
+
+summary(mod.veg.8)
+drop1(mod.veg.8, test = "Chisq")
+r.squaredGLMM(mod.veg.8)
+
+
+
+
+
+# Vegetation height by season - box plot with notch true ------
+# only include morning (i.e. one point per season)
+fs <- field2$day == 1
+names_seasons <- field2$season
+levels(names_seasons) <- c("Beginning", "Middle", "End")
+win.metafile(filename = "veg_height_season_boxplot.wmf", width = 5, height = 5, pointsize = 12)
+boxplot(field2$veg.height[fs]~names_seasons[fs], notch = TRUE,
+        xlab = "Observation period",
+        ylab = "Vegetation height (cm)",
+        cex.lab = 1.2, cex.axis = 1.1, las = 1
+        )
+dev.off()
+
+
+
+# LBBG presence counts -----
+boxplot(field2$LBBG ~ field2$season + field2$day)
