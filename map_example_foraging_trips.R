@@ -257,3 +257,25 @@ trips_f_map <- rbind.data.frame(x,y)
 
 write.table(trips_f_map, file = "mapped_trips2.csv",
             sep = ",")
+
+
+
+
+
+
+
+
+
+
+
+# Plot foraging locations (not at colony, and speed < 3ms-1)
+# Seatrip points filter
+sea.trip <- trips_f$trip_id[gotland_on == FALSE]
+land.trip <- trips_f$trip_id[gotland_on == TRUE]
+
+
+# Forage points
+# Distance from colony
+
+
+gps$speed_3d < 3
