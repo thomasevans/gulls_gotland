@@ -328,6 +328,9 @@ png("model_gps.png",  width = 8*dpi, height = 9*dpi, res = dpi)
 # lattice::dotplot(coef_new ~ mean, ci_df_sort)
 
 
+# If plotting from here directly
+load("GPS_LBBG_lattice_fig3_20151125.RData")
+
 lattice::dotplot(coef_new ~ mean, ci_df_sort, xlim = c(-5,5),
 #                  cexl.lab = 1.5, cex.axis = 1.5,
                  xlab = list("Effect (log-odds of terrestrial trip)",cex=1.3),
