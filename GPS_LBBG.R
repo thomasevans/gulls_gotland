@@ -295,7 +295,7 @@ stdz.model9.ci.Wald <- confint(stdz.model9, method="Wald")
 plot(stdz.model9.ci.Wald)
 
 
-
+library(lattice)
 # From http://www.ashander.info/posts/2015/04/D-RUG-mixed-effects-viz/
 ci_dat <-stdz.model9.ci.Wald
 ci_dat <- cbind(ci_dat, mean=rowMeans(ci_dat))
@@ -303,7 +303,7 @@ ci_df <- data.frame(coef=row.names(ci_dat), ci_dat)
 names(ci_df)[2:3] <- c('lwr', 'upr')
 ci_df$coef_new <- c("(intercept)", "June", "July",
           "Cloud", "Temperature", "Precipitation",
-          "Time since sunrise (cosine)",
+          "Sunrise proximity",
           "2012", "2013", "June:Temperature",
           "July:Temperature")
 
@@ -314,7 +314,7 @@ ci_df_sort$coef_new <- factor(ci_df_sort$coef_new, levels = unique(ci_df_sort$co
 
 
 # ci_df
-ci_df_sort <- ci_df[c(11,1,2,3,8,5,7,10,9,4,6),]
+# ci_df_sort <- ci_df[c(11,1,2,3,8,5,7,10,9,4,6),]
 
 ci_df$coef_new <- factor(ci_df$coef_new, levels = unique(ci_df$coef_new))
 
