@@ -320,6 +320,7 @@ ci_df$coef_new <- factor(ci_df$coef_new, levels = unique(ci_df$coef_new))
 
 library(lattice)
 win.metafile("model_gps.wmf", width = 8, height = 12)
+cairo_pdf("model_gps.pdf",  width = 8, height = 9)
 
 dpi <- 300
 png("model_gps.png",  width = 8*dpi, height = 9*dpi, res = dpi)

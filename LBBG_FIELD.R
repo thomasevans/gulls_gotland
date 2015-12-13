@@ -879,6 +879,7 @@ logi.hist.plot(field$veg.height, field$LBBG,
 win.metafile("veght_lbbg.wmf", width = 5, height = 5)
 dpi <- 300
 png("veght_lbbg.png",  width = 6*dpi, height = 6*dpi, res = dpi)
+cairo_pdf("veght_lbbg.pdf",  width = 6, height = 6)
 boxplot(field$veg.height ~ field$LBBG, xlab = "Lesser black-backed gulls",
         ylab = "Vegetation height (cm)",
         las = 1, notch = TRUE, names = c("Absent", "Present"))
@@ -888,6 +889,8 @@ dev.off()
 win.metafile("veght_cov.wmf", width = 5, height = 5)
 dpi <- 300
 png("veght_cov.png",  width = 6*dpi, height = 6*dpi, res = dpi)
+cairo_pdf("veght_cov.pdf",  width = 6, height = 6)
+
 boxplot(field$veg.height ~ field$veg.cover2, xlab = "Vegetation cover (%)",
         ylab = "Vegetation height (cm)",
         las = 1, notch = TRUE, names = c("0-25", "25-50", "50-75", "75-100"))
@@ -902,6 +905,8 @@ field$crop3 <- factor(field$crop3,sort(levels(field$crop3)))
 win.metafile("veght_crop.wmf", width = 5, height = 5)
 dpi <- 300
 png("veght_crop.png",  width = 6*dpi, height = 6*dpi, res = dpi)
+cairo_pdf("veght_crop.pdf",  width = 6, height = 6)
+
 boxplot(field$veg.height ~ field$crop3, xlab = "Crop type",
         ylab = "Vegetation height (cm)",
         las = 1, notch = TRUE)
@@ -911,6 +916,8 @@ dev.off()
 win.metafile("veght_obper.wmf", width = 5, height = 5)
 dpi <- 300
 png("veght_obper.png",  width = 6*dpi, height = 6*dpi, res = dpi)
+cairo_pdf("veght_obper.pdf",  width = 6, height = 6)
+
 boxplot(field$veg.height ~ field$season, xlab = "Observation period",
         ylab = "Vegetation height (cm)",
         las = 1, notch = TRUE, names = c("Beginning", "Middle", "End"))
@@ -928,6 +935,8 @@ monthyear
 # getwd()
 
 win.metafile(filename = "time_of_season_gps.wmf", width = 7, height = 7, pointsize = 12)
+cairo_pdf(filename = "time_of_season_gps.pdf", width = 7, height = 7)
+# cairo_pdf()
 barplot(monthyear, xlab="Month", ylab="Proportion terrestrial foraging trips (%)", ylim=c(0,100), 
         col=c("gray1", "gray47", "gray87"), beside=TRUE,
         names.arg=c("May", "June", "July"), axes=FALSE,
