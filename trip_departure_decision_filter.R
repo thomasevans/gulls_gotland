@@ -38,7 +38,7 @@ View(trips)
 
 # Filter data ----
 
-# *trip_type ----
+# *f0 - trip_type ----
 # 1/0, 1 - migratory, 0 - non-migratory
 # First filter out migratory trips.
 # Note double equals sign to indicate 'is equal to'
@@ -50,7 +50,7 @@ summary(f0)
 f <- f0
 
 
-# *fix_n ----
+# *f1 - fix_n ----
 # Fix number - Number of GPS fixes for a trip
 # First see the distribution and don't include
 # migratory trips (use the filter we made above)
@@ -82,7 +82,7 @@ f <- f0 & f1
 summary(f)
 
 
-# *duration_s ----
+# *f3 - duration_s ----
 # The duration of a trip in seconds
 # For a trip to be a 'foraging trip' it should have
 # some minimum duration, plus also a maximum.
@@ -168,7 +168,7 @@ summary(f)
 # summary(f)
 
 
-# *dist_max ----
+# *f5 - dist_max ----
 # The maximum distance (km) reached from the nest
 # It seems sensible to have a minimum distance threshold.
 # If the bird only travels say 1 km, perhaps it is roosting
@@ -200,7 +200,7 @@ f <- f & f5
 summary(f)
 
 
-# *interval_max ----
+# *f6 - interval_max ----
 # Maximum time interval between GPS locations
 # We don't want to include trips with long data gaps.
 # If there is a very long gap there could potentially
@@ -234,13 +234,28 @@ f <- f & f6
 summary(f)
 
 
-# *month-----
-# Months are stored as text, as a factor. They are numbered.
-# 01 - January
-# 02 - February, etc. ...
+# # *f7 - date-period -----
+# # Months are stored as text, as a factor. They are numbered.
+# # 01 - January
+# # 02 - February, etc. ...
+# 
+# # Filter to include only trips during May (05), June (06), and July (07)
+# f7 <- trips$month == "05" |  trips$month == "06" |  trips$month == "07"
+# 
+# summary(f7)
+# # Add to existing filter
+# f <- f & f7
+# # See how many trips we now have (TRUE)
+# summary(f)
 
-# Filter to include only trips during May (05), June (06), and July (07)
-f7 <- trips$month == "05" |  trips$month == "06" |  trips$month == "07"
+# *Period of interest------
+
+# Filter to include only trips from 20th May to 21st July
+
+f7 <- (trips$start_time>="2011-05-20" & trips$start_time<="2011-07-21")| +
+  (trips$start_time>="2012-05-20" & trips$start_time<="2012-07-21")| +
+  (trips$start_time>="2013-05-20" & trips$start_time<="2013-07-21")
+# f7 <- trips$start_time >= "05" &  trips$start_time == "06"
 
 summary(f7)
 # Add to existing filter
@@ -248,37 +263,44 @@ f <- f & f7
 # See how many trips we now have (TRUE)
 summary(f)
 
+
+
 # Summary ----
 # We applied the following 7 filters:
 # Non-migration trips
-f0 <- trips$trip_type == 0  
+f0 <- trips$trip_type == 0
 
-# At least 8 GPS locations
-f1 <- trips$fix_n >= 8  
+# At least 10 GPS locations
+f1 <- trips$fix_n >= 10
 
 # Note there is no f2!
 
-# Trips of less than ca. 31 hours
-f3 <- trips$duration_s < 110000  
+# Trips of less than 2 days
+day <- 24*60*60
+f3 <- trips$duration_s < 2*day
 
-3500/60/60
-
-# Trips of at least ca. 1 hour
-f4 <- trips$duration_s > 3500  
+# Note there is no f4!
 
 # Trips where the furthest point reached is at least 3 km
-f5 <- trips$dist_max > 3   
+f5 <- trips$dist_max > 3
 
 # Trips with no more than 30 minutes between GPS locations
+hour <- 60*60
 f6 <- trips$interval_max < 0.5 * hour
 
-# Trips during months of May, June, and July only
-f7 <- trips$month == "05" |  trips$month == "06" |  trips$month == "07"
+# Trips from 20th May to 21st July only (for the 3 years of the study)
+f7 <- (trips$start_time>="2011-05-20" & trips$start_time<="2011-07-21")| +
+  (trips$start_time>="2012-05-20" & trips$start_time<="2012-07-21")| +
+  (trips$start_time>="2013-05-20" & trips$start_time<="2013-07-21")
+
+
+# Combine these filters
+f <- f0 & f1 & f3 & f5 & f6 & f7
 
 length(trips$fix_n)
 # We started with 3321 trips ...
 summary(f)
-# ... and ended up with 1250 trips that met the above criteria
+# ... and ended up with 1038 trips that met the above criteria
 
 # Sample sizes ----
 # First install package 'reshape2' which makes this
@@ -306,6 +328,11 @@ aggregate(fix_n ~ year + ring_number ,
           data = trips,
           FUN = length)
 
+# Number of trips per individual by month and year
+aggregate(fix_n ~ month + year + ring_number ,
+          data = trips,
+          FUN = length)
+
 # Number of individuals
 length(unique(trips$ring_number))
 
@@ -317,21 +344,12 @@ length(unique(trips$ring_number))
 trips.f <- trips[f,]
 
 # Save as an R data file
-save(trips.f, file = "foraging_trip_info_filtered.RData")
+save(trips.f, file = "foraging_trip_info_filtered_jan2016.RData")
 
 # Output to a csv file
-write.csv(trips.f, file = "foraging_trip_info_filtered.csv")
+write.csv(trips.f, file = "foraging_trip_info_filtered_jan2016.csv")
 
 # Output to an Excel file
 # First install required library
 install.packages("xlsx")
 install.packages("rJava")
-
-# Apparently neccessary on Windows to get rJava working, which is required for the xlsx package.
-Sys.getenv("JAVA_HOME")
-Sys.setenv(JAVA_HOME="C:\\Program Files\\Java\\jre7\\")
-library("rJava")
-library("xlsx")
-
-# Now output the file
-write.xlsx(trips.f, file = "foraging_trip_info_filtered.xlsx")
