@@ -20,7 +20,7 @@
 # Set the data directory where the data resides
 # Remember that R doesn't like back-slashes, either
 # replace with forward-slashes(/), or a doulble back-slash (\\)
-setwd("D:/Dropbox/LBBG_terrestrial_foraging/departure_decision")
+# setwd("D:/Dropbox/LBBG_terrestrial_foraging/departure_decision")
 
 # Now read in the data file
 load("foraging_trip_info.RData")
@@ -62,16 +62,18 @@ hist(trips$fix_n[f & trips$fix_n < 100])
 hist(trips$fix_n[f & trips$fix_n < 15])
 
 
+summary(trips$fix_n >= 10)
+
 # There's no obvious cut-off (bi-modal distribution etc)
 # Therefor I suggest just using a 'reasonable' value,
-# perhaps 8 fixes, which should be adequate for this
+# perhaps 10 fixes, which should be adequate for this
 # analysis where we want to know things like - did they go
 # to Gotland, aproximatly how much time on Gotland. What
 # was the furthest point they reached?
 
 # Create filter to exclude trips with less than 8 points
-# Retain trips with 8 or more GPS locations (fixes)
-f1 <- trips$fix_n >= 8
+# Retain trips with 10 or more GPS locations (fixes)
+f1 <- trips$fix_n >= 10
 summary(f1)
 
 # We can combine with the previous filter using 'AND'
@@ -118,38 +120,52 @@ abline(v = 110000,
        lty = 2, lwd = 2, col = "blue")
 # What is this in days?
 110000/day
-# Just over 1-day. Perhaps unlikely for a chick-rearing trip
-# but possible for an incubation stint. We'll take this for
-# the maximum time duration.
-f3 <- trips$duration_s < 110000
+
+summary(trips$duration_s < 110000)
+summary(trips$duration_s < 2*day)
+
+
+# 2-day is probably a bit long for regular trips, but it fits more with the distribution
+# Could be possible during incubation too I guess...
+f3 <- trips$duration_s < 2*day
 summary(f3)
 f <- f & f3
 # We've now excluded one-third of trips!
 summary(f)
 
-# Minimum time duration
-hist(trips$duration_s[f])
-# View trips less than 5 hours
-hour <- 60 * 60
-hist(trips$duration_s[f & trips$duration_s < 5 * hour])
-# Lets reduce the bin width
-hist(trips$duration_s[f & trips$duration_s < 5 * hour],
-     breaks = 40)
-# There's not a really obvious cut-off. However there is
-# a drop in the number of trips per a time duration below
-# ca. 3500 seconds.
-abline(v = 3500, lty = 2, lwd = 2, col = "red")
-# What is this in hours?
-3500 / hour
-# Just under an hour - that seems a reasonable time duration,
-# probably enough to travel a short distance forage a bit,
-# then return
-
-# Minimum time duration filter
-f4 <- trips$duration_s > 3500
-summary(f4)
-f <- f & f4
-summary(f)
+#  - I think the minimum time duration can be skipped if we use a distance threshold - very
+# short distance trips are also likely to be of short time duration - so the two problems
+# may then resolve together.
+# # Minimum time duration
+# hist(trips$duration_s[f])
+# # place line every 5th hour
+# hour <- 60 * 60
+# abline(v = hour*seq(5,50,5),lty = 2, lwd = 2, col = "red")
+# 
+# 
+# # View trips less than 5 hours
+# hist(trips$duration_s[f & trips$duration_s < 5 * hour])
+# # Lets reduce the bin width
+# hist(trips$duration_s[f & trips$duration_s < 5 * hour],
+#      breaks = 50)
+# hist(trips$duration_s[f & trips$duration_s < 5 * hour],
+#      breaks = 100)
+# abline(v = hour*c(1:48),lty = 2, lwd = 2, col = "red")
+# # There's not a really obvious cut-off. However there is
+# # a drop in the number of trips per a time duration below
+# # ca. 3500 seconds.
+# abline(v = 3500, lty = 2, lwd = 2, col = "red")
+# # What is this in hours?
+# 3500 / hour
+# # Just under an hour - that seems a reasonable time duration,
+# # probably enough to travel a short distance forage a bit,
+# # then return
+# 
+# # Minimum time duration filter
+# f4 <- trips$duration_s > 3500
+# summary(f4)
+# f <- f & f4
+# summary(f)
 
 
 # *dist_max ----
@@ -165,12 +181,17 @@ hist(trips$dist_max[f], breaks = 20)
 hist(trips$dist_max[f & trips$dist_max < 150], breaks = 20)
 
 # Less than 20 km
-hist(trips$dist_max[f & trips$dist_max < 20], breaks = 20)
+hist(trips$dist_max[f & trips$dist_max < 20], breaks = 40)
 # Here there is a fairly clear potential cut-off. There are
 # quite a number of trips of 0-1 km and 1 - 2 km, but few
 # 2 - 4 km, then a gradual increase.
 # Let's then suggest a threshold of 3 km
 abline(v = 3, lty = 2, lwd = 2, col = "red")
+# This is the same threshold used in:
+# Camphuysen, K.C.J., Shamoun-Baranes, J., Loon, E.E. van, Bouten, W., 2015. Sexually distinct foraging
+# strategies in an omnivorous seabird. Mar Biol 162, 1417–1428. doi:10.1007/s00227-015-2678-9
+
+
 
 f5 <- trips$dist_max > 3
 summary(f5)
