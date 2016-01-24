@@ -349,7 +349,7 @@ save(trips.f, file = "foraging_trip_info_filtered_jan2016.RData")
 # Output to a csv file
 write.csv(trips.f, file = "foraging_trip_info_filtered_jan2016.csv")
 
-# Output to an Excel file
-# First install required library
-install.packages("xlsx")
-install.packages("rJava")
+# # Output to an Excel file
+# # First install required library
+# install.packages("xlsx")
+# install.packages("rJava")
