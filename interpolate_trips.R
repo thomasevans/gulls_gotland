@@ -67,82 +67,12 @@ points_all_nona.ltraj <- as.ltraj(points_all_nona[,4:3], points_all_nona$date_ti
 points_all_nona.ltraj.300 <- redisltraj(points_all_nona.ltraj, 300, type = "time")
 
 
-# # See how this looks
-# plot(points_all_nona.ltraj.600)
-# plot(points_all_nona.ltraj.300)
-# 
-# points_all_nona.ltraj.300
-# summary(points_all_nona.ltraj.300)
-# 
-# 
-# chooseseg(points_all_nona.ltraj.300)
-# hist.ltraj(points_all_nona.ltraj.300)
-
-
-# # Alpha channel ----
-# addalpha <- function(colors, alpha=1.0) {
-#   r <- col2rgb(colors, alpha=T)
-#   # Apply alpha
-#   r[4,] <- alpha*255
-#   r <- r/255.0
-#   return(rgb(r[1,], r[2,], r[3,], r[4,]))
-# }
-# 
-# 
 # Convert data back to data.frame ----
 points_all_nona_300s <- ld(points_all_nona.ltraj.300)
 
-# par(mfrow=c(1,1))
-# v_calc <- points_all_nona_300s$dist/300*1000
-# plot(abs(points_all_nona_300s$rel.angle)~v_calc, xlim = c(0,0.4),
-#      col = addalpha("black", alpha = 0.05))
-# 
-# hist(points_all_nona_300s$dist, breaks = 10000, xlim = c(0,0.1))
-# hist(points_all_nona_300s$dist, breaks = 10000, xlim = c(0,0.02))
-# 
-# hist(abs(points_all_nona_300s$rel.angle), breaks = 100)
-# 
-# 
-# # hist(points_all_nona_300s$R2n)
-# 
-# ?fpt
-# 
-# i <- fpt(points_all_nona.ltraj.300[5], seq(0.001,0.04, length=30), units = "seconds")
-# plot(i, scale = 5, warn = FALSE)
-# varlogfpt(i)
-# 
-# plot(points_all_nona.ltraj.300[5])
-# 
-# hist(points_all_nona_300s$R2n, xlim = c(0,0.5), breaks = 1000)
-# 
-# plot(points_all_nona.ltraj.300[5])
-# plot.resiti(points_all_nona.ltraj.300[5])
-# plotltr(points_all_nona.ltraj.300[5], "dt")
-# 
-# 
-# hist(points_all_nona_300s$dist*12, xlim = c(0,1), breaks = 10000)
-# 
-# 
-# x1 <- deg.dist(points_all_nona_300s$x[1:1000],
-#          points_all_nona_300s$y[1:1000],
-#          points_all_nona_300s$x[2:1001],
-#          points_all_nona_300s$y[2:1001], km = FALSE)
-# x2 <- points_all_nona_300s$dist[1:1000]
-# 
-# hist(x1/300)
-# 
-# plot(x1~x2)
-# 
-# ?coordinates
-# # ?deg
 
 # Change radian angles to degrees
 deg.relangle <- deg(points_all_nona_300s$rel.angle)
-# hist(deg.relangle)
-# range(deg.relangle, na.rm =  TRUE)
-# rose.diag(na.omit(points_all_nona_300s$rel.angle), bins = 36, prop = 1.5)
-# # View turning angles as rosediagram
-# plot(points_all_nona_300s$dist, deg.relangle)
 
 
 # Output data ------
