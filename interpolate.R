@@ -12,3 +12,34 @@ points(xf, pch, col = "orange")
 ?pchip
 
 ?interp1
+
+
+
+# Try adehabitat packages
+install.packages("adehabitatLT")
+library("adehabitatLT")
+
+# Rediscrete in time - linear interpolation
+?redisltraj
+
+# Example
+
+data(puechcirc)
+
+puechcirc
+
+## before rediscretization
+plot(puechcirc, perani = FALSE)
+
+## after rediscretization
+toto <- redisltraj(puechcirc, 400, nnew = 5)
+plot(toto, perani = FALSE)
+
+
+# Could use this method, though looks like it's most suited to beggining with a fairly regular time interval
+install.packages("zoo")
+
+library("zoo")
+
+?na.spline
+?na.approx
