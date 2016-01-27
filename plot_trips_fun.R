@@ -1,7 +1,12 @@
 # A file to source to plot maps of foraging trips
 
 
-
+plot.trips <- function(long = NA, lat = NA, trip_ids = NA,
+                       alpha = 0.7, brewer.pal.name = "Paired", for_points_sea = NA,
+                       for_points_got = NA){
+  
+  trip_ids_unique <- unique(trip_ids)
+  trip.n <- length(trip_ids_unique)
   
   # Function to plot a base map ----
   # Plot a map with coastlines only - no 
@@ -32,6 +37,14 @@
     
   }
   
+  # Alpha channel ----
+  addalpha <- function(colors, alpha=1.0) {
+    r <- col2rgb(colors, alpha=T)
+    # Apply alpha
+    r[4,] <- alpha*255
+    r <- r/255.0
+    return(rgb(r[1,], r[2,], r[3,], r[4,]))
+  }
   
   # hack map.scale function
   # map.scale2 <- map.scale
@@ -40,25 +53,28 @@
   
   # Plot trips ----
   
+#   # Suppress warnings from brewer.pal
+  oldw <- getOption("warn")
+  options(warn = -1)
+  
   # lbbg_flight_ids <- unique(gps_lbbg$flight_id)
   # col.vec <- rainbow(length(land_10))
-  col.vec <- brewer.pal(10, "Paired")
-  
-  
-  col.vec.al <- addalpha(col.vec, alpha = 0.7)
+  col.vec <- brewer.pal(trip.n, brewer.pal.name)
+  col.vec.al <- addalpha(col.vec, alpha = alpha)
   col.vec.al.rand <- col.vec.al[sample(seq_along(col.vec.al))]
   
+  if(length(col.vec.al.rand) < trip.n){
+    col.vec.al.rand <- c(col.vec.al.rand,col.vec.al.rand)
+  }
+  
+  
+  options(warn = oldw)
   
   # Plot all trips -------
-
-
   
   
-  # i <- 12
-  gps.s <- gps[gps$trip_id %in% land_10,]
-  
-  xlim.n <- range(gps.s$longitude)
-  ylim.n <- range(gps.s$latitude)
+  xlim.n <- range(long)
+  ylim.n <- range(lat)
   
   x.range <- xlim.n[2] - xlim.n[1]
   
@@ -70,16 +86,26 @@
   
   
   map.base.fun(xlim = xlim.n, ylim = ylim.n)
-  i <- 1
-  for(i in 1:length(land_10)){
+  i <-13
+  for(i in 1:trip.n){
     
-    x <- land_10[i]
-    # ?subset
-    gps.sub <- gps.s[gps.s$trip_id == x,]
-    n <- length(gps.sub$longitude)
-    segments(gps.sub$longitude[-1], gps.sub$latitude[-1],
-             gps.sub$longitude[1:n-1], gps.sub$latitude[1:n-1],
+    fx <- trip_ids == trip_ids_unique[i]
+    n <- length(long[fx])
+    # ?points
+    points(long[fx], lat[fx], col = col.vec.al.rand[i], cex = 0.5, lwd = 0.8)
+    segments(long[fx][-1], lat[fx][-1],
+             long[fx][1:n-1], lat[fx][1:n-1],
              col = col.vec.al.rand[i], lty = 1, lwd = 2)
+    col.sym <- addalpha(c("red", "blue"), alpha = 0.5)
+    points(long[for_points_got & fx], lat[for_points_got & fx],
+            col = col.sym[1], cex = 0.4, pch = 19, lwd = 0.5)
+    points(long[for_points_sea & fx], lat[for_points_sea & fx],
+           col = col.sym[2], cex = 0.4, pch = 19, lwd = 0.5)
   }
   map.scale(ratio = FALSE,
-            relwidth = 0.25, cex = 1.2)
+            relwidth = 0.30, cex = 1)
+  
+  
+  
+}
+  
