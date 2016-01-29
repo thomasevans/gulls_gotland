@@ -206,7 +206,7 @@ summary(p_gotland_over_3km> 0.95 & p_gotland_over_3km < 1.)
 
 # Label trip by period (new classification)
 
-# If crach - start again here!
+# ######### If crash - start again here! ######### -----------------
 load("trip_summary_data.RData")
 
 # Plot examples of trips -----
@@ -328,3 +328,53 @@ ftable(mytable)
 
 mytable <- table(class_3, class_original) 
 ftable(mytable)
+
+
+# Summarise by date periods for plotting -----
+trips_x <- trips
+names(trips_x)[1] <- "trip_id"
+load("foraging_trip_info.RData")
+trips_detailed <- merge(df_combined, trips_x, "trip_id")
+trips_detailed <- merge(trips_detailed, trips, "trip_id")
+
+trips_detailed$date_time <- as.POSIXct(paste(trips_detailed$date_utc,
+                                             trips_detailed$time_utc, ssep = " "),
+                                       tz = "UTC")
+
+
+
+
+
+df.period <- data.frame()
+df.period$year <- NULL
+df.period$season <- NULL
+df.period$date_mid <- NULL
+df.period$p_got <- NULL
+df.period$p_mix <- NULL
+df.period$p_sea <- NULL
+df.period$n_got <- NULL
+df.period$n_mix <- NULL
+df.period$n_sea <- NULL
+df.period$n_tot <- NULL
+
+
+
+
+years <- 2011:2013
+# For each year (3)
+i <- 1
+  start_date <- as.POSIXct(paste(years[i], "-05-20 00:00", sep = ""), tz = "UTC")
+  
+  # For each date period in year (4)
+    
+    # add 6 days to get the end date
+    end_date <- start_date + 6*24*60*60
+    
+    # Trip filter
+    tf <- (trips_detailed$date_time > start_date) & (trips_detailed$date_time < end_date)
+    # summary(tf)
+
+    
+
+
+
