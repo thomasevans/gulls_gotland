@@ -345,36 +345,138 @@ trips_detailed$date_time <- as.POSIXct(paste(trips_detailed$date_utc,
 
 
 
-df.period <- data.frame()
-df.period$year <- NULL
-df.period$season <- NULL
-df.period$date_mid <- NULL
-df.period$p_got <- NULL
-df.period$p_mix <- NULL
-df.period$p_sea <- NULL
-df.period$n_got <- NULL
-df.period$n_mix <- NULL
-df.period$n_sea <- NULL
-df.period$n_tot <- NULL
+df.period <- data.frame(year= integer(36),season= character(36),
+                        date_mid= .POSIXct(character(36), tz = "UTC"),p_got= numeric(36),
+                        p_mix= numeric(36),p_sea= numeric(36),
+                        n_got= integer(36),n_mix= integer(36),
+                        n_sea= integer(36),n_tot= integer(36),
+                        p_for_got_mean= numeric(36),
+                        p_for_got_med = numeric(36))
 
+str(trips)
 
+seasons <- as.factor(c("incubation", "chick_early", "chick_late"))
 
-
+levels(df.period$season) <- levels(seasons)
+ 
 years <- 2011:2013
 # For each year (3)
-i <- 1
-  start_date <- as.POSIXct(paste(years[i], "-05-20 00:00", sep = ""), tz = "UTC")
-  
-  # For each date period in year (4)
+# i <- 2
+ix <- 1
+  for(i in 1:3){
+    start_date <- as.POSIXct(paste(years[i], "-05-20 00:00:00", sep = ""), tz = "UTC")
     
-    # add 6 days to get the end date
-    end_date <- start_date + 6*24*60*60
+    # For each date period in year (4)
+    # iz  
+    # iz <- 1
+    for(iz in 1:12){
+      
+      # add 6 days to get the end date
+      end_date <- start_date + 6*24*60*60
+      
+      # Trip filter
+      tf <- (trips_detailed$date_time > start_date) & (trips_detailed$date_time < end_date)
+      # summary(tf)
+      
+      df.period$year[ix] <- years[i]
+      if(iz <= 4) {df.period$season[ix] <- seasons[1]}else if(iz <= 8){
+        df.period$season[ix] <- seasons[2]
+      } else df.period$season[ix] <- seasons[3]
+      # df.period$season[ix] <- switch(floor(iz/4)+1, seasons[1], seasons[2], seasons[3])
+      df.period$date_mid[ix] <- start_date + 3*24*60*60
+      df.period$n_got[ix] <- sum(trips_detailed$class_3[tf] == "LAND", na.rm = TRUE)
+      df.period$n_mix[ix] <- sum(trips_detailed$class_3[tf] == "MIX", na.rm = TRUE)
+      df.period$n_sea[ix] <- sum(trips_detailed$class_3[tf] == "SEA", na.rm = TRUE)
+      df.period$n_tot[ix] <- length(trips_detailed$class_3[tf])
+      df.period$p_got[ix] <- df.period$n_got[ix]/df.period$n_tot[ix]
+      df.period$p_mix[ix] <- df.period$n_mix[ix]/df.period$n_tot[ix]
+      df.period$p_sea[ix] <- df.period$n_sea[ix]/df.period$n_tot[ix]
+      df.period$p_for_got_mean[ix] <- mean(trips_detailed$p_for_got[tf], na.rm = TRUE)
+      df.period$p_for_got_med[ix] <- median(trips_detailed$p_for_got[tf], na.rm = TRUE)
+      ix <- ix +1
+      start_date <- start_date + 5*24*60*60
+    }
     
-    # Trip filter
-    tf <- (trips_detailed$date_time > start_date) & (trips_detailed$date_time < end_date)
-    # summary(tf)
+  }
+# warnings()
 
+
+# Make nice ggplot thing of trip types by date -----
+
+
+# Example code from: http://stackoverflow.com/questions/11458349/add-text-to-a-faceted-plot-in-ggplot2-with-dates-on-x-axis
+ggplot(dat, aes(x=date, y=value, color=location, group=location)) + 
+  geom_line()+
+  facet_grid(product ~ ., scale = "free_y")
+
+
+# Previous code
+png("ggplot_prop_land_sea_sep.png", , width = 10*dpi, height = 5*dpi, res = dpi)
+ggplot(gg_df_new, aes(x = rank_id, y = value, fill = variable, order=variable)) +
+  geom_bar(stat = "identity") +
+  scale_fill_manual(values=c("light blue"," dark grey","dark green")) +
+  geom_vline(xintercept = c(711,803), colour="red", linetype = "longdash", lwd =1.5)
+dev.off()
+
+gg_df_new <- melt(gg_df, id=c("rank_id"))
+gg_df_new$variable <-  factor(gg_df_new$variable, levels = c("p_sea","p_oth","p_got"))
+levels(gg_df_new$variable) <- c("Sea", "Other", "Land")
+
+
+# New code
+library(ggplot2)
+library(scales)
+library(reshape2)
+
+gg_trips_period_df <- cbind.data.frame(df.period$year, df.period$date_mid,
+                                       df.period$p_got*100, df.period$p_mix*100,
+                                       df.period$p_sea*100)
+names(gg_trips_period_df) <- c("Year", "Date", "Land", "Mixed", "Sea")
+str(gg_trips_period_df)
+
+gg_trips_period_df$Date <- as.Date(paste("2011-", format(gg_trips_period_df$Date, "%m-%d"), sep = ""))
+
+gg_df_period_new <- melt(gg_trips_period_df, id.vars = c("Year", "Date"))
+
+date.per <- as.numeric(c(as.Date("2011-06-10"), as.Date("2011-07-01")))
+
+
+dpi = 600
+png("ggplot_prop_land_sea_mix_date.png", , width = 10*dpi, height = 10*dpi, res = dpi)
+ggplot(gg_df_period_new, aes(x = Date, y = value, color = variable)) + 
+  geom_line(lwd = 1)+
+  facet_grid(Year ~ ., scale = "fixed") +
+  ylim(0, 100) +
+  geom_vline(xintercept = date.per,
+             colour="dark grey", linetype = "longdash", lwd =1.5)
+dev.off()
+# getwd()
+
+# Prepare trip info for export ------
+
+
+incubation.starts <- as.POSIXct(paste(years, "-05-20 00:00:00", sep = ""), tz = "UTC")
+chick_rearing.starts <- as.POSIXct(paste(years, "-06-10 00:00:00", sep = ""), tz = "UTC") 
+chick_rearing_late.starts <- as.POSIXct(paste(years, "-07-01 00:00:00", sep = ""), tz = "UTC")
+chick_rearing_late.ends <- as.POSIXct(paste(years, "-07-22 00:00:00", sep = ""), tz = "UTC")    
     
 
+period <- rep(NA, nrow(trips_detailed))
+for(i in 1:3){
+  period[(trips_detailed$date_time > incubation.starts[i]) & (trips_detailed$date_time < chick_rearing.starts[i])] <- "Incubation"
+  period[(trips_detailed$date_time > chick_rearing.starts[i]) & (trips_detailed$date_time < chick_rearing_late.starts[i])] <- "Chick_1"
+  period[(trips_detailed$date_time > chick_rearing_late.starts[i]) & (trips_detailed$date_time < chick_rearing_late.ends[i])] <- "Chick_2"
+
+}
+
+summary(as.factor(period))
+
+years.trip <- format(trips_detailed$date_time, "%Y")
+
+
+trips_detailed_new <- cbind(trips_detailed, period, years.trip)
+
+# ?write.csv
+write.csv(trips_detailed_new, file = "trips_details_2016_01_29.csv")
 
 
