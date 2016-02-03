@@ -176,7 +176,7 @@ summary(f)
 # Let's first have a look at what this looks like
 hist(trips$dist_max[f])
 hist(trips$dist_max[f], breaks = 20)
-
+summary(trips$dist_max[f] > 300)
 # Look at trips of less than 150 km
 hist(trips$dist_max[f & trips$dist_max < 150], breaks = 20)
 
@@ -196,6 +196,8 @@ abline(v = 3, lty = 2, lwd = 2, col = "red")
 f5 <- trips$dist_max > 3
 summary(f5)
 
+summary(trips$dist_max[f] > 3)
+
 f <- f & f5
 summary(f)
 
@@ -208,7 +210,7 @@ summary(f)
 # algorithm to dettect trips works simply on starting 
 # a trip when the bird leaves the island to when it
 # returns to the island.
-
+hour <- 60*60
 # First view this paramater
 hist(trips$interval_max[f])
 # Cut-down to less than 10 hours (using the hour that we
@@ -255,6 +257,7 @@ summary(f)
 f7 <- (trips$start_time>="2011-05-20" & trips$start_time<="2011-07-21")| +
   (trips$start_time>="2012-05-20" & trips$start_time<="2012-07-21")| +
   (trips$start_time>="2013-05-20" & trips$start_time<="2013-07-21")
+
 # f7 <- trips$start_time >= "05" &  trips$start_time == "06"
 
 summary(f7)
