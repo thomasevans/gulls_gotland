@@ -212,6 +212,8 @@ load("trip_summary_data.RData")
 # Plot examples of trips -----
 source("plot_trips_fun.R")
 
+
+
 f <- (p_gotland_over_3km_1ms_sub3move >= 0.00 & p_gotland_over_3km_1ms_sub3move <= 0.05)
 
 f2 <- trip.points.new$col_dist > 3000 & trip.points.new$p2p_dist < 1500 &
@@ -246,6 +248,47 @@ dev.off()
 # length(trip.points.new$longitude[points.f])
 # length(for_points)
 
+
+# Plot long trips ----
+# trip.points.new$trip_id
+
+trips.detail <- read.csv("trips_details_2016_01_29.csv", header = TRUE)
+
+f <- trips.detail$duration_s > 1*24*60*60
+hist(trips.detail$p_for_got[f], breaks = 20)
+summary(f)
+f2 <- trip.points.new$col_dist > 3000 & trip.points.new$p2p_dist < 1500 &
+  trip.points.new$p2p_dist > 20  & trip.points.new$gotland_on_bool
+
+f3 <- trip.points.new$col_dist > 3000 & trip.points.new$p2p_dist < 1500 &
+  trip.points.new$p2p_dist > 20  & !trip.points.new$gotland_on_bool
+
+
+# trip_ids <- unique(trips$trip_id_int[f])
+trip_ids <- trips.detail$trip_id[f]
+
+
+# If too many trips to plot, plot a sample
+if(length(trip_ids) > 8){
+  trip_ids <- sample(trip_ids,8)
+}
+
+str(trip_ids)
+str(trip.points.new$trip_id)
+
+points.f <- trip.points.new$trip_id %in% trip_ids
+# summary(points.f)
+for_points_got <- (f2 & points.f)[points.f]
+for_points_sea <- (f3 & points.f)[points.f]
+
+png("long_24h_trips_sample.png")
+plot.trips(long = trip.points.new$longitude[points.f],
+           lat = trip.points.new$latitude[points.f],
+           trip_ids = trip.points.new$trip_id[points.f],
+           for_points_got =  for_points_got,
+           for_points_sea =  for_points_sea)
+
+dev.off()
 
 # Make some fancy plot of these trips ------
 
