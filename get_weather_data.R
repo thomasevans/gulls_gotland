@@ -14,7 +14,7 @@ help("RNCEP")
 # Weather data (we use 'NCEP-DOE Reanalysis 2', option 'reanalysis2 = TRUE')
 
 # Load trip data
-trips <- read.csv("foraging_trip_info_filtered_july2015_start_time_only.csv", header = TRUE)
+trips <- read.csv("trips_details_2016_01_29.csv", header = TRUE)
 
 
 # Check date_time format
@@ -216,11 +216,20 @@ hist(prate.sfc.sum*6*60*60, breaks = 100)
 weather.data <- cbind.data.frame(trips$trip_id,tcdc.eatm.mean,
                                  prate.sfc.sum, air.2m.mean.c,
                                  vwnd.10m.mean, uwnd.10m.mean)
-names(weather.data)[1] <- "trip_id"
+names(weather.data) <- c("trip_id", "tcdc_eatm_mean",
+                         "prate_sfc_sum", "air_2m_mean_c",
+                         "vwnd_10m_mean", "uwnd_10m_mean")
 str(weather.data)
 
 
 # Output data frame (table)
-write.csv(weather.data, file = "weather.data.csv", 
+write.csv(weather.data, file = "weather.data_20160203.csv", 
           row.names = FALSE)
 
+
+
+# Merge with trip_info table
+trips.info <- merge(trips, weather.data, "trip_id")
+
+write.csv(trips.info, file = "trips_details_2016_01_29_detailed.csv", 
+          row.names = FALSE)
