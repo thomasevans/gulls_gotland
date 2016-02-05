@@ -5,6 +5,8 @@
 
 trips<-trips_details_2016_01_29_detailed
 
+trips <- read.csv("trips_details_2016_01_29_detailed.csv", header = TRUE)
+
 #take a look at the structure to make sure it makes sense
 str(trips)
 
@@ -164,6 +166,61 @@ r8
 r9
 r10
 r11
+
+
+# Repeatability thing for best model -------
+mod.7
+
+r_thing <- attr(lme4::VarCorr(mod.7)$ring_number, "stddev")^2/(attr(lme4::VarCorr(mod.7)$ring_number, 
+                                                   "stddev")^2 + attr(lme4::VarCorr(mod.7), "sc")^2)
+
+null = c()
+for (i in 1:1000) {
+  ring_number_rand = sample(trips$ring_number, length(trips$ring_number))
+  null[i] = anova(lmer(got_eps ~ 1 + (1 | ring_number_rand), trips), mod.7, 
+                  test = "Chisq")$Pr[2]
+}
+sum(null > 0.05)/length(null)
+# p value - <0.001
+
+# y <- unlist(simulate(mod.7))
+# str(y)
+
+
+# Get CI
+i <- 1
+rvalues <- numeric()
+for (i in 1:10) {
+  y <- unlist(simulate(mod.7))
+  mboot <- glmer(y~stage+cloud+temp+ppt+sunrise_prox+(1|ring_number),family=binomial(link='logit'), data=trips)
+  # mboot <- lmer(y[, 1] ~ 1 + (1 | ring_number), trips)
+  rvalues[i] = attr(lme4::VarCorr(mboot)$ring_number, "stddev")^2/(attr(lme4::VarCorr(mboot)$ring_number, 
+                                                                    "stddev")^2 + attr(lme4::VarCorr(mboot), "sc")^2)
+}
+quantile(rvalues, c(0.025, 0.975))
+hist(rvalues)
+mean(rvalues)
+summary(rvalues)
+
+
+
+
+i <- 1
+rvalues <- numeric()
+for (i in 1:10) {
+  y = simulate(mod.7)
+  mboot <- lmer(y[, 1] ~ 1 + (1 | ring_number), trips)
+  rvalues[i] = attr(lme4::VarCorr(mboot)$ring_number, "stddev")^2/(attr(lme4::VarCorr(mboot)$ring_number, 
+                                                                        "stddev")^2 + attr(lme4::VarCorr(mboot), "sc")^2)
+}
+quantile(rvalues, c(0.025, 0.975))
+hist(rvalues)
+mean(rvalues)
+summary(rvalues)
+
+
+
+
 
 
 ####summary stats------
