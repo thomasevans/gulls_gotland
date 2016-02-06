@@ -214,7 +214,7 @@ source("plot_trips_fun.R")
 
 
 
-f <- (p_gotland_over_3km_1ms_sub3move >= 0.00 & p_gotland_over_3km_1ms_sub3move <= 0.05)
+f <- (p_gotland_over_3km_1ms_sub3move >= 0.0 & p_gotland_over_3km_1ms_sub3move <= 0.05)
 
 f2 <- trip.points.new$col_dist > 3000 & trip.points.new$p2p_dist < 1500 &
   trip.points.new$p2p_dist > 20  & trip.points.new$gotland_on_bool
@@ -226,24 +226,33 @@ f3 <- trip.points.new$col_dist > 3000 & trip.points.new$p2p_dist < 1500 &
 trip_ids <- unique(trips$trip_id_int[f])
 
 # If too many trips to plot, plot a sample
-if(length(trip_ids > 8)){
-  trip_ids <- sample(trip_ids,8)
-}
+# if(length(trip_ids > 8)){
+  trip_ids <- sample(trip_ids,10)
+# }
 
 points.f <- trip.points.new$trip_id %in% trip_ids
 # summary(points.f)
 for_points_got <- (f2 & points.f)[points.f]
 for_points_sea <- (f3 & points.f)[points.f]
+points_other <- (!f2 & !f3 & points.f)[points.f]
 
 # summary(for_points)
-dpi = 600
-png("example_trips_0.0_0.05_y_2.png", width = 5*dpi, height = 5*dpi, res = dpi)
+dpi = 1000
+png("example_trips_sea_0.05less_3.png", width = 5*dpi, height = 8*dpi, res = dpi)
+# pdf("example_trips_new.pdf", width = 5, height = 8)
+# postscript("example_trips_new.eps", width = 5, height = 8, horizontal = FALSE, onefile = FALSE)
+# library(devEMF)
+# emf(file="example_trips_new.emf", bg="white", width=5, height=8, family="Calibri", pointsize=20)
+# win.metafile(filename = "example_trips_new.wmf", width = 5, height = 8, pointsize = 12,
+#              restoreConsole = TRUE)
 plot.trips(long = trip.points.new$longitude[points.f],
            lat = trip.points.new$latitude[points.f],
            trip_ids = trip.points.new$trip_id[points.f],
            for_points_got =  for_points_got,
-           for_points_sea =  for_points_sea)
+           for_points_sea =  for_points_sea,
+           other_points = points_other)
 dev.off()
+# warnings()
 
 # length(trip.points.new$longitude[points.f])
 # length(for_points)
@@ -320,24 +329,20 @@ levels(gg_df_new$variable) <- c("Sea", "Other", "Land")
 library(ggplot2)
 library(scales)
 
-
-# sb <- ggplot(gg_df_new, aes(x=trip_id,value,fill=variable)) +
-#   geom_bar(binwidth = 1)
-# sb
-# 
-# p<-ggplot(gg_df_new,stat="identity")
-# p<-p+geom_bar(aes(x=rank.trip,value,fill=variable))
-# p
-# 
-# q <- ggplot(gg_df_new, aes(x = trip_id, value, fill=variable))
-# q + geom_bar(aes(fill = variable))
-# 
-# 
-png("ggplot_prop_land_sea_sep.png", , width = 10*dpi, height = 5*dpi, res = dpi)
+gg_df_new$value <- gg_df_new$value*100
+dpi <- 1000
+png("ggplot_prop_land_sea_sep_fig_2.png", , width = 10*dpi, height = 5*dpi, res = dpi)
 ggplot(gg_df_new, aes(x = rank_id, y = value, fill = variable, order=variable)) +
-  geom_bar(stat = "identity") +
+  geom_bar(stat = "identity", width = 1) +
   scale_fill_manual(values=c("light blue"," dark grey","dark green")) +
-  geom_vline(xintercept = c(711,803), colour="red", linetype = "longdash", lwd =1.5)
+  # geom_vline(xintercept = c(711,803), colour="red", linetype = "longdash", lwd =1.5) +
+  scale_y_continuous(name="Proportion of foraging trip (%)", breaks=seq(0,100,20)) + 
+  scale_x_continuous(name="Trip (rank order)") +
+  # scale_y_continuous() +
+  theme(axis.title = element_text(face="bold", size=18),
+        axis.text  = element_text(size = 12),
+        legend.title=element_blank(),
+        legend.text = element_text(size = 14))
 dev.off()
 
 
