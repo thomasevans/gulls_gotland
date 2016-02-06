@@ -5,6 +5,8 @@
 
 trips<-trips_details_2016_01_29_detailed
 
+trips <- read.csv("trips_details_2016_01_29_detailed.csv", header = TRUE)
+
 #take a look at the structure to make sure it makes sense
 str(trips)
 
@@ -125,6 +127,8 @@ mod.9<-glmer(got_eps~stage+cloud+temp+ppt+temp*stage+(1|ring_number),family=bino
 mod.10<-glmer(got_eps~stage+cloud+temp+ppt+sunrise_prox+year+temp*stage+(1|ring_number),family=binomial(link='logit'), data=trips)
 mod.11<-glmer(got_eps~stage+cloud+temp+ppt+sunrise_prox+temp*stage+(1|ring_number),family=binomial(link='logit'), data=trips)
 
+mod.7.plus <- glmer(got_eps~stage+cloud+temp+sunrise_prox+(1|ring_number),family=binomial(link='logit'), data=trips)
+mod.7.plus2 <- glmer(got_eps~cloud+temp+sunrise_prox+(1|ring_number),family=binomial(link='logit'), data=trips)
 
 #compare the models with ANOVA and AICc
 anova(mod.1, mod.2, mod.3, mod.4, mod.5, mod.6, mod.7, mod.8, mod.9, mod.10, mod.11)
@@ -132,12 +136,15 @@ aic.val <- AICc(mod.1, mod.2, mod.3, mod.4, mod.5, mod.6, mod.7, mod.8, mod.9, m
 str(aic.val)
 aic.val
 
+AICc(mod.7,mod.7.plus, mod.7.plus2)
+
 #select model with lowest AICc, then take the diff bw it and all the others
 aic.val$dAICc <- aic.val$AICc - aic.val$AICc[7]
 aic.val[order(aic.val$dAICc),]
 
 #to get coefficients of 'best' model, check out summary!
 summary(mod.7)
+summary(mod.7.plus2)
 
 #get the R2 values
 
@@ -195,3 +202,62 @@ summary(stdz.model7)
 sjp.glmer(stdz.model7)
 drop1(stdz.model7, test="Chi")
 
+
+
+
+# Repeatability thing for best model -------
+mod.7
+
+# Get r
+r_thing <- attr(lme4::VarCorr(mod.7)$ring_number, "stddev")^2/(attr(lme4::VarCorr(mod.7)$ring_number, 
+                                                                    "stddev")^2 + attr(lme4::VarCorr(mod.7), "sc")^2)
+
+# Get p value (is r significantly different from 0?)
+null = c()
+i <- 5
+# for (i in 1:1000) {
+#   ring_number_rand = sample(trips$ring_number, length(trips$ring_number))
+#   null[i] = anova(lmer(got_eps ~ 1 + (1 | ring_number_rand), trips), mod.7, 
+#                   test = "Chisq")$Pr[2]
+# }
+for (i in 1:1000) {
+  ring_number_rand <- sample(trips$ring_number, length(trips$ring_number))
+  null[i] <- anova((glmer(got_eps ~stage+cloud+temp+ppt+sunrise_prox+(1|ring_number_rand),
+                          family=binomial(link='logit'), data=trips)), mod.7, 
+                   test = "Chisq")$Pr[2]
+}
+sum(null > 0.05)/length(null)
+# p value 
+# range(null)
+
+# Get CI
+i <- 1
+rvalues <- numeric()
+for (i in 1:1000) {
+  y <- unlist(simulate(mod.7))
+  mboot <- glmer(y~stage+cloud+temp+ppt+sunrise_prox+(1|ring_number),family=binomial(link='logit'), data=trips)
+  # mboot <- lmer(y[, 1] ~ 1 + (1 | ring_number), trips)
+  rvalues[i] = attr(lme4::VarCorr(mboot)$ring_number, "stddev")^2/(attr(lme4::VarCorr(mboot)$ring_number, 
+                                                                        "stddev")^2 + attr(lme4::VarCorr(mboot), "sc")^2)
+}
+quantile(rvalues, c(0.025, 0.975))
+
+hist(rvalues)
+mean(rvalues)
+summary(rvalues)
+
+
+
+
+i <- 1
+rvalues <- numeric()
+for (i in 1:10) {
+  y = simulate(mod.7)
+  mboot <- lmer(y[, 1] ~ 1 + (1 | ring_number), trips)
+  rvalues[i] = attr(lme4::VarCorr(mboot)$ring_number, "stddev")^2/(attr(lme4::VarCorr(mboot)$ring_number, 
+                                                                        "stddev")^2 + attr(lme4::VarCorr(mboot), "sc")^2)
+}
+quantile(rvalues, c(0.025, 0.975))
+hist(rvalues)
+mean(rvalues)
+summary(rvalues)
