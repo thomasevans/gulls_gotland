@@ -2,8 +2,10 @@
 
 
 plot.trips <- function(long = NA, lat = NA, trip_ids = NA,
-                       alpha = 0.7, brewer.pal.name = "Paired", for_points_sea = NA,
-                       for_points_got = NA){
+                       alpha = 0.7, brewer.pal.name = "Paired",
+                       for_points_sea = NA,
+                       for_points_got = NA,
+                       other_points = NA){
   
   trip_ids_unique <- unique(trip_ids)
   trip.n <- length(trip_ids_unique)
@@ -92,15 +94,20 @@ plot.trips <- function(long = NA, lat = NA, trip_ids = NA,
     fx <- trip_ids == trip_ids_unique[i]
     n <- length(long[fx])
     # ?points
-    points(long[fx], lat[fx], col = col.vec.al.rand[i], cex = 0.5, lwd = 0.8)
+    # points(long[fx], lat[fx], col = col.vec.al.rand[i], cex = 0.5, lwd = 0.8)
     segments(long[fx][-1], lat[fx][-1],
              long[fx][1:n-1], lat[fx][1:n-1],
              col = col.vec.al.rand[i], lty = 1, lwd = 2)
-    col.sym <- addalpha(c("red", "blue"), alpha = 0.5)
+    col.sym <- addalpha(c("light blue","dark green",
+                          "dark grey", "light grey"), alpha = 0.5)
+    col.sea <- addalpha("light blue", alpha = 0.8)
+    points(long[other_points & fx], lat[other_points & fx],
+           bg = col.sym[3], col = col.sym[4], cex = 0.6, pch = 21, lwd = 0.5)
     points(long[for_points_got & fx], lat[for_points_got & fx],
-            col = col.sym[1], cex = 0.4, pch = 19, lwd = 0.5)
+            bg = col.sym[2], col = col.sym[4], cex = 0.8, pch = 21, lwd = 0.5)
     points(long[for_points_sea & fx], lat[for_points_sea & fx],
-           col = col.sym[2], cex = 0.4, pch = 19, lwd = 0.5)
+           bg = col.sea, col = col.sym[4], cex = 0.8, pch = 21, lwd = 0.5)
+
   }
   map.scale(ratio = FALSE,
             relwidth = 0.30, cex = 1)
