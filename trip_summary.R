@@ -452,23 +452,23 @@ ix <- 1
 # Make nice ggplot thing of trip types by date -----
 
 
-# Example code from: http://stackoverflow.com/questions/11458349/add-text-to-a-faceted-plot-in-ggplot2-with-dates-on-x-axis
-ggplot(dat, aes(x=date, y=value, color=location, group=location)) + 
-  geom_line()+
-  facet_grid(product ~ ., scale = "free_y")
-
-
-# Previous code
-png("ggplot_prop_land_sea_sep.png", , width = 10*dpi, height = 5*dpi, res = dpi)
-ggplot(gg_df_new, aes(x = rank_id, y = value, fill = variable, order=variable)) +
-  geom_bar(stat = "identity") +
-  scale_fill_manual(values=c("light blue"," dark grey","dark green")) +
-  geom_vline(xintercept = c(711,803), colour="red", linetype = "longdash", lwd =1.5)
-dev.off()
-
-gg_df_new <- melt(gg_df, id=c("rank_id"))
-gg_df_new$variable <-  factor(gg_df_new$variable, levels = c("p_sea","p_oth","p_got"))
-levels(gg_df_new$variable) <- c("Sea", "Other", "Land")
+# # Example code from: http://stackoverflow.com/questions/11458349/add-text-to-a-faceted-plot-in-ggplot2-with-dates-on-x-axis
+# ggplot(dat, aes(x=date, y=value, color=location, group=location)) + 
+#   geom_line()+
+#   facet_grid(product ~ ., scale = "free_y")
+# 
+# 
+# # Previous code
+# png("ggplot_prop_land_sea_sep.png", , width = 10*dpi, height = 5*dpi, res = dpi)
+# ggplot(gg_df_new, aes(x = rank_id, y = value, fill = variable, order=variable)) +
+#   geom_bar(stat = "identity") +
+#   scale_fill_manual(values=c("light blue"," dark grey","dark green")) +
+#   geom_vline(xintercept = c(711,803), colour="red", linetype = "longdash", lwd =1.5)
+# dev.off()
+# 
+# gg_df_new <- melt(gg_df, id=c("rank_id"))
+# gg_df_new$variable <-  factor(gg_df_new$variable, levels = c("p_sea","p_oth","p_got"))
+# levels(gg_df_new$variable) <- c("Sea", "Other", "Land")
 
 
 # New code
@@ -487,16 +487,52 @@ gg_trips_period_df$Date <- as.Date(paste("2011-", format(gg_trips_period_df$Date
 gg_df_period_new <- melt(gg_trips_period_df, id.vars = c("Year", "Date"))
 
 date.per <- as.numeric(c(as.Date("2011-06-10"), as.Date("2011-07-01")))
+# str(gg_df_period_new)
+# str(gg_df_period_new$Year)
+# dpi = 600
+# ann_text <- data.frame(Date = ,
+#                        value = 90,lab = c("Incubation", "Chick-rearing 1",
+#                                           "Chick-rearing 2"),
+#                        Year = 2011)
+# ann_text$Year <- as.integer(ann_text$Year)
+# 
+# # vars <- data.frame(expand.grid(levels(gg_df_period_new$Year)))
+# 
+# dat <- data.frame(x = as.Date(c("2011-05-30", "2011-06-15", "2011-07-05")),
+#                   y = rep(90, 3), as.integer(2011), labs=c("Incubation", "Chick-rearing 1",
+#                                                "Chick-rearing 2"))
+# 
+# p + geom_text(aes(x, y, label=labs, group=NULL),data=dat)
 
-
-dpi = 600
-png("ggplot_prop_land_sea_mix_date.png", , width = 10*dpi, height = 10*dpi, res = dpi)
+dpi <- 1000
+library(scales) # for date_breaks()
+# png("ggplot_prop_land_sea_sep_fig_2.png", , width = 10*dpi, height = 5*dpi, res = dpi)
+png("ggplot_prop_land_sea_mix_date_new.png", width = 10*dpi, height = 6*dpi, res = dpi)
 ggplot(gg_df_period_new, aes(x = Date, y = value, color = variable)) + 
+  # scale_x_date(date_minor_breaks = "5 day") +
   geom_line(lwd = 1)+
+  scale_color_manual(values=c("dark green", "magenta", "dark blue")) +
   facet_grid(Year ~ ., scale = "fixed") +
-  ylim(0, 100) +
+  # ylim(0, 100) +
   geom_vline(xintercept = date.per,
-             colour="dark grey", linetype = "longdash", lwd =1.5)
+             colour="dark grey", linetype = "longdash", lwd =1.5) +
+  scale_y_continuous(name="Proporition of trips (%)", breaks=seq(0,100,20),
+                     limits = c(0,100)) + 
+  # scale_x_continuous(name="Date") +
+  # scale_y_continuous() +
+  scale_x_date(breaks = date_breaks("10 day"),
+                     minor_breaks = date_breaks("5 day"),
+               labels=date_format("%d-%b"))+
+               # date_labels = "%d-%b") +
+  # scale_x_date(date_labels = "%d-%b")+
+  # ylim(0,100)+
+  theme(axis.title = element_text(face="bold", size=18),
+        axis.text  = element_text(size = 12),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 14))
+  # + geom_text(aes(x, y, label=labs, group=NULL),data=dat)
+  # annotate("text", x = (c(as.Date("2011-05-30"))), y = 90, label = "Some text")
+
 dev.off()
 # getwd()
 
@@ -526,5 +562,85 @@ trips_detailed_new <- cbind(trips_detailed, period, years.trip)
 
 # ?write.csv
 write.csv(trips_detailed_new, file = "trips_details_2016_01_29.csv")
+
+
+
+# Time of day figure -----
+# Based on script in 'time_of_day_figure.R' script
+
+library(lubridate)
+
+win.metafile(filename = "time_of_day_new.wmf", width = 10, height = 6, pointsize = 12)
+
+
+time_from_sunrise_h <- trips_detailed$sunrise_dif_s/60/60
+range(time_from_sunrise_h)
+
+range.fun <- function(x){
+  if(x > 20){x <- (x -24)}
+  return(x)
+}
+time_from_sunrise_h <- sapply(time_from_sunrise_h, range.fun)
+range(time_from_sunrise_h)
+# hist(time_from_sunrise_h)
+
+# Plot all trips first
+hist(time_from_sunrise_h, xlim = c(-4,20), xaxs = "i", yaxs = "i",
+     ylim = c(0,120), breaks = 24, col='white',
+     border = TRUE, main = "", xlab = "Time since sunrise (h)",
+     ylab = "N  trips per hour",
+     xaxt = "n",
+     las = 1,
+     cex.lab = 1.4,
+     cex.axt = 1.2,
+     font.lab = 2,
+     mgp=c(3,1,0))
+
+
+day_length <- trips_detailed$sunset_date_time - trips_detailed$sunrise_date_time
+min(day_length)
+max(day_length)
+# hist(as.numeric(day_length))
+  
+rect(-4, 0, 24, 120, density = NULL, angle = 45,
+     col = "light yellow", border = NA)
+rect(min(day_length), 0, 24, 120, density = NULL, angle = 45,
+     col = "light grey", border = NA)
+rect(max(day_length), 0, 24, 120, density = NULL, angle = 45,
+     col = "dark grey", border = NA)
+rect(-4, 0, 0, 120, density = NULL, angle = 45,
+     col = "dark grey", border = NA)
+# ?rect
+
+
+# Marine trips (actually all - but will be covered)
+hist(time_from_sunrise_h,
+    breaks = 24, col='dark blue',
+    border = "white", add = TRUE)
+
+
+
+# Of which mixed trips
+hist(time_from_sunrise_h[p_for_got>0.05],
+     breaks = 24, col='magenta',
+     border = "white", add = TRUE)
+
+
+# Of which land trips
+hist(time_from_sunrise_h[p_for_got>0.95],
+     breaks = 24, col='dark green',
+     border = "white", add = TRUE)
+
+axis(1, at = seq(-4,20,2), labels = seq(-4,20,2), pos = 0,
+     cex = 1.2)
+axis(2, pos = -4,
+     cex = 1.2, las = 1)
+# Make it a bit prettier
+# box()
+dev.off()
+
+
+
+
 
 
