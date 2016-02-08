@@ -644,3 +644,81 @@ dev.off()
 
 
 
+# Place holding - figure of coefs from models ------
+
+# First make sure to use the standardized model to allow for comparison
+stdz.mod.7<-standardize(mod.7, standardize.y=FALSE)
+# Check this looks sensible
+summary(stdz.mod.7)
+
+# Get confidence intervals for coeficients
+stdz.mod.7.ci.Wald <- confint(stdz.mod.7, method="Wald")
+
+# Need this package for plots:
+library(lattice)
+
+# I worked this out based on code here:
+# http://www.ashander.info/posts/2015/04/D-RUG-mixed-effects-viz/
+
+# Make a data.frame of the CI
+ci_dat <-stdz.mod.7.ci.Wald
+ci_dat <- cbind(ci_dat, mean=rowMeans(ci_dat))
+ci_df <- data.frame(coef = row.names(ci_dat), ci_dat)
+names(ci_df)[2:3] <- c('lwr', 'upr')
+
+# View current coeficient names:
+ci_df$coef
+
+# Make a new vector of coeficient names (need to change these to what is
+# sensible based on the model)
+ci_df$coef_new <- c(NA, "(intercept)", "Stage - Chick 1", "Stage - Chick 2",
+                    "Cloud", "Temperature", "Precipitation",
+                    "Sunrise proximity")
+
+# If you want the coeficients displayed in a different order to the current
+# Here we sort them in order of the coeficient value
+ci_df_sort <- ci_df[order(ci_df$mean),]
+ci_df_sort$coef_new <- factor(ci_df_sort$coef_new, levels = unique(ci_df_sort$coef_new))
+
+
+# Plot the figure
+lattice::dotplot(coef_new ~ mean, ci_df_sort, xlim = c(-5,5),
+                 #                  cexl.lab = 1.5, cex.axis = 1.5,
+                 xlab = list("Effect (log-odds of terrestrial foraging)",cex=1.3),
+                 panel = function(x, y) {
+                   panel.segments(ci_df_sort$lwr, y, ci_df_sort$upr, y, lwd =2)
+                   panel.xyplot(x, y, pch=18, cex = 1.2, col = "black")
+                   panel.abline(v=0, lty=2)
+                 },scales=list(y=list(cex=1.2), x = list(cex = 1.2))
+)
+
+
+
+
+
+
+
+
+# Make vector of day numbers  ------
+
+get.day.fun <- function(x, y){
+  if(y == "2011"){day1 =  as.POSIXct("2011-05-20")} else {
+    if(y == "2012"){
+      day1 =  as.POSIXct("2012-05-20")
+    }else {
+      day1 =  as.POSIXct("2013-05-20")
+    }
+  } 
+  
+  days <- as.numeric(difftime(x,day1,units = "days"))
+  return(days)
+  
+}
+
+days_from_20_may <- mapply(x = trips$date_utc, y = trips$year, FUN = get.day.fun)
+
+hist(z)
+
+test <- cbind.data.frame(trips$date_utc, trips$year, z)
+
+get.day.fun(as.POSIXct("2012-05-27"), "2012")
