@@ -1,7 +1,13 @@
 ####Prep: read in file 'LBBGfield2.xlsx', all variables, no NA, seems to work better with lme4.####
 
-field<-LBBGfield2
-field
+
+
+# field<-LBBGfield2
+
+
+
+field <- read.table("LBBGfield2.txt", header = TRUE,
+                    sep = "\t")
 View(field)
 str(field)
 head(field)
