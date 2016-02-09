@@ -197,7 +197,10 @@ library(Rcpp)
 library(arm)
 library(MuMIn)
 
-stdz.model7<-standardize(mod.7, standardize.y=FALSE)
+mod.12<-glmer(got_eps~stage+cloud+temp+sunrise_prox+(1|ring_number),family=binomial(link='logit'), data=trips)
+summary(mod.12)
+
+stdz.model7<-standardize(mod.12, standardize.y=FALSE)
 summary(stdz.model7)
 sjp.glmer(stdz.model7)
 drop1(stdz.model7, test="Chi")
@@ -209,12 +212,12 @@ drop1(stdz.model7, test="Chi")
 mod.7
 
 # Get r
-r_thing <- attr(lme4::VarCorr(mod.7)$ring_number, "stddev")^2/(attr(lme4::VarCorr(mod.7)$ring_number, 
-                                                                    "stddev")^2 + attr(lme4::VarCorr(mod.7), "sc")^2)
+r_thing <- attr(lme4::VarCorr(stdz.model7)$ring_number, "stddev")^2/(attr(lme4::VarCorr(stdz.model7)$ring_number, 
+                                                                    "stddev")^2 + attr(lme4::VarCorr(stdz.model7), "sc")^2)
 
 # Get p value (is r significantly different from 0?)
 null = c()
-i <- 5
+# i <- 5
 # for (i in 1:1000) {
 #   ring_number_rand = sample(trips$ring_number, length(trips$ring_number))
 #   null[i] = anova(lmer(got_eps ~ 1 + (1 | ring_number_rand), trips), mod.7, 
@@ -222,8 +225,8 @@ i <- 5
 # }
 for (i in 1:1000) {
   ring_number_rand <- sample(trips$ring_number, length(trips$ring_number))
-  null[i] <- anova((glmer(got_eps ~stage+cloud+temp+ppt+sunrise_prox+(1|ring_number_rand),
-                          family=binomial(link='logit'), data=trips)), mod.7, 
+  null[i] <- anova((glmer(got_eps ~stage+cloud+temp+sunrise_prox+(1|ring_number_rand),
+                          family=binomial(link='logit'), data=trips)), stdz.model7, 
                    test = "Chisq")$Pr[2]
 }
 sum(null > 0.05)/length(null)
@@ -234,8 +237,8 @@ sum(null > 0.05)/length(null)
 i <- 1
 rvalues <- numeric()
 for (i in 1:1000) {
-  y <- unlist(simulate(mod.7))
-  mboot <- glmer(y~stage+cloud+temp+ppt+sunrise_prox+(1|ring_number),family=binomial(link='logit'), data=trips)
+  y <- unlist(simulate(stdz.model7))
+  mboot <- glmer(y~stage+cloud+temp+sunrise_prox+(1|ring_number),family=binomial(link='logit'), data=trips)
   # mboot <- lmer(y[, 1] ~ 1 + (1 | ring_number), trips)
   rvalues[i] = attr(lme4::VarCorr(mboot)$ring_number, "stddev")^2/(attr(lme4::VarCorr(mboot)$ring_number, 
                                                                         "stddev")^2 + attr(lme4::VarCorr(mboot), "sc")^2)
