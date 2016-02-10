@@ -138,3 +138,9 @@ view(kappa.df)
 vif.mer(stdz.mod.field8)
 
 vif.mer(stdz.mod.field12)
+
+colldiag.mer(stdz.mod.field8)
+colldiag.mer(stdz.mod.field12)
+
+maxcorr.mer(stdz.mod.field12)
+maxcorr.mer(stdz.mod.field8)
