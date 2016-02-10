@@ -126,6 +126,7 @@ mod.8<-glmer(got_eps~stage+cloud+temp+ppt+(1|ring_number),family=binomial(link='
 mod.9<-glmer(got_eps~stage+cloud+temp+ppt+temp*stage+(1|ring_number),family=binomial(link='logit'), data=trips)
 mod.10<-glmer(got_eps~stage+cloud+temp+ppt+sunrise_prox+year+temp*stage+(1|ring_number),family=binomial(link='logit'), data=trips)
 mod.11<-glmer(got_eps~stage+cloud+temp+ppt+sunrise_prox+temp*stage+(1|ring_number),family=binomial(link='logit'), data=trips)
+mod.12<-glmer(got_eps~stage+cloud+temp+sunrise_prox+temp*stage+(1|ring_number),family=binomial(link='logit'), data=trips)
 
 mod.7.plus <- glmer(got_eps~stage+cloud+temp+sunrise_prox+(1|ring_number),family=binomial(link='logit'), data=trips)
 mod.7.plus2 <- glmer(got_eps~cloud+temp+sunrise_prox+(1|ring_number),family=binomial(link='logit'), data=trips)
@@ -201,6 +202,8 @@ mod.12<-glmer(got_eps~stage+cloud+temp+sunrise_prox+(1|ring_number),family=binom
 summary(mod.12)
 
 stdz.model7<-standardize(mod.12, standardize.y=FALSE)
+stdz.model.12<-standardize(mod.12, standardize.y=FALSE)
+
 summary(stdz.model7)
 sjp.glmer(stdz.model7)
 drop1(stdz.model7, test="Chi")
@@ -264,3 +267,33 @@ quantile(rvalues, c(0.025, 0.975))
 hist(rvalues)
 mean(rvalues)
 summary(rvalues)
+
+
+
+# Check model for colinearity -------
+source("mer-utils.R")
+
+stdz.model.12
+stdz.model7<-standardize(mod.7, standardize.y=FALSE)
+
+# Kappa
+mod.list <- list(mod.1, mod.2, mod.3, mod.4, mod.5,
+                 mod.6, mod.7, mod.8, mod.9, mod.10,
+                 mod.11, mod.12, stdz.model.12, stdz.model7)
+kappas <- unlist(lapply(mod.list, kappa.mer))
+
+
+kappa.df <- cbind.data.frame((c("mod.1", "mod.2", "mod.3", "mod.4", "mod.5",
+                                "mod.6", "mod.7", "mod.8", "mod.9", "mod.10",
+                                "mod.11", "mod.12", "stdz.model.12",
+                                "stdz.model7")), kappas)
+names(kappa.df) <- c("mod", "kappa")
+# See what this looks like
+view(kappa.df)
+
+vif.mer(mod.12)
+vif.mer(stdz.model.12)
+
+colldiag.mer(stdz.model.12)
+
+maxcorr.mer(stdz.model.12)
