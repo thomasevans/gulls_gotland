@@ -297,3 +297,42 @@ vif.mer(stdz.model.12)
 colldiag.mer(stdz.model.12)
 
 maxcorr.mer(stdz.model.12)
+
+
+
+# View random effect -----
+sex.df <- unique(cbind.data.frame(trips$ring_number,trips$sex))
+sex.df <- sex.df[order(sex.df$`trips$ring_number`),]
+ran.ef <- ranef(stdz.model.12, condVar=TRUE)
+# str(ran.df)
+
+rad.df <- ran.ef[[1]]
+# rad.df <- ran.ef[[1]]
+rad.df <- cbind.data.frame(row.names(rad.df),rad.df, as.vector(unlist(attr(ran.ef[[1]], which = "postVar"))))
+rad.df <- cbind.data.frame(rad.df, sex.df$`trips$sex`)
+names(rad.df) <- c("Ring_number", "Intercept", "CI", "Sex")
+
+
+# lattice::dotplot(ranef(stdz.model.12, condVar=TRUE))
+
+
+ci_df <- data.frame(coef = (rad.df$Ring_number), rad.df$Intercept)
+
+
+
+lower_ci <- rad.df$Intercept-rad.df$CI
+upper_ci <- rad.df$Intercept+rad.df$CI
+rad.df <- cbind.data.frame(rad.df, lower_ci, upper_ci)
+rad.df <- rad.df[order(rad.df$Intercept),]
+rad.df$Ring_number <- factor(rad.df$Ring_number, levels = unique(rad.df$Ring_number))
+
+library(lattice)
+lattice::dotplot(Ring_number ~ Intercept, rad.df, xlim = c(-5,5),
+                 #                  cexl.lab = 1.5, cex.axis = 1.5,
+                 xlab = list("Effect (log-odds of terrestrial foraging)",cex=1.3),
+                 panel = function(x, y) {
+                   panel.segments(rad.df$lower_ci, y, rad.df$upper_ci, y, lwd =2, col = as.numeric(rad.df$Sex))
+                   panel.xyplot(x, y, pch=18, cex = 1.2, col = as.numeric(rad.df$Sex))
+                   panel.abline(v=0, lty=2)
+                 },scales=list(y=list(cex=1.2), x = list(cex = 1.2))
+)
