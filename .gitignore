@@ -28,3 +28,7 @@ time_of_day.data.csv
 *.csv
 *.data.csv
 weather.data.csv
+.RDataTmp
+LBBGfield2.txt
+example_trips_new.emf
+kappa_vif_stuff.txt
