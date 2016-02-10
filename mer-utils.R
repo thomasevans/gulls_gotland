@@ -47,6 +47,7 @@ kappa.mer <- function (fit,
   }
 }
 
+
 colldiag.mer <- function (fit,
                           scale = TRUE, center = FALSE,
                           add.intercept = TRUE) {
@@ -55,15 +56,15 @@ colldiag.mer <- function (fit,
   ## more than one high variance propotion.  see ?colldiag for more
   ## tips.
   result <- NULL
-  if (center) 
+  if (center)
     add.intercept <- FALSE
   if (is.matrix(fit) || is.data.frame(fit)) {
     X <- as.matrix(fit)
     nms <- colnames(fit)
   }
-  else if (class(fit) == "mer") {
+  else if (class(fit) == "glmerMod") {
     nms <- names(fixef(fit))
-    X <- fit@X
+    X <- getME(fit, "X")
     if (any(grepl("(Intercept)", nms))) {
       add.intercept <- FALSE
     }
@@ -93,16 +94,17 @@ colldiag.mer <- function (fit,
     rownames(condindx) <- 1:length(condindx)
     colnames(pi) <- 1:ncol(pi)
     rownames(pi) <- 1:nrow(pi)
-  }         
+  }
   
   result <- data.frame(cbind(condindx, pi))
   zapsmall(result)
 }
 
+
 maxcorr.mer <- function (fit,
                          exclude.intercept = TRUE) {
   so <- summary(fit)
-  corF <- so@vcov@factors$correlation
+  corF <- vcov(fit)
   nam <- names(fixef(fit))
   
   ## exclude intercepts
