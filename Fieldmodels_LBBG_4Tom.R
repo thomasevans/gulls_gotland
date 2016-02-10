@@ -7,7 +7,7 @@
 
 
 field <- read.table("LBBGfield2.txt", header = TRUE,
-                    sep = "\t")
+                    sep = "\t", dec = ",")
 View(field)
 str(field)
 head(field)
@@ -22,6 +22,9 @@ field$veg.cover2<-as.factor(field$veg.cover2)
 field$day<-as.factor(field$day)
 field$season<-as.factor(field$season)
 field$wind.dir4<-as.factor(field$wind.dir4)
+# str(field$veg.height)
+# field$veg.height <-as.numeric(as.character(field$veg.height))
+
 
 str(field)
 
@@ -107,3 +110,31 @@ stdz.mod.field12<-standardize(mod.field12, standardize.y=FALSE)
 summary(stdz.mod.field12)
 
 #good to know: crop1 is roots, crop2 is grass, crop3 is cereals, crop4 is ryegrass, crop5 is other (rapeseed and snowpeas)
+
+
+
+# VIF + Kappa -------
+summary(stdz.mod.field8)
+
+# Get functions from 'mer-utils.R'
+source("mer-utils.R")
+
+
+# Kappa
+mod.list <- list(mod.int, mod.field1, mod.field2, mod.field3, mod.field4,
+              mod.field5, mod.field6, mod.field7, 
+              mod.field8, mod.field9, mod.field10, mod.field11, mod.field12)
+kappas <- unlist(lapply(mod.list, kappa.mer))
+
+
+kappa.df <- cbind.data.frame((c("mod.int", "mod.field1", "mod.field2", "mod.field3", "mod.field4",
+                                "mod.field5", "mod.field6", "mod.field7", 
+                                "mod.field8", "mod.field9", "mod.field10", "mod.field11", "mod.field12")), kappas)
+names(kappa.df) <- c("mod", "kappa")
+# See what this looks like
+view(kappa.df)
+
+
+vif.mer(stdz.mod.field8)
+
+vif.mer(stdz.mod.field12)
