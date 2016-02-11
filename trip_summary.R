@@ -4,7 +4,9 @@
 
 # Load in trip point data ---
 load("trip_points_annotated.RData")
+# load("trip_points_annotated_ext.RData")
 
+# plot(trip.points.new$date_time)
 
 # Package to summarise data---
 library(reshape2)
@@ -842,3 +844,117 @@ hist(z)
 test <- cbind.data.frame(trips$date_utc, trips$year, z)
 
 get.day.fun(as.POSIXct("2012-05-27"), "2012")
+
+
+
+# Figure for trip types for extended period ---------
+names(trips)[1] <- "trip_id"
+trips_detailed <- merge.data.frame(trips,df_combined,"trip_id")
+
+df.period <- data.frame(year= integer(48),season= character(48),
+                        date_mid= .POSIXct(character(48), tz = "UTC"),p_got= numeric(48),
+                        p_mix= numeric(48),p_sea= numeric(48),
+                        n_got= integer(48),n_mix= integer(48),
+                        n_sea= integer(48),n_tot= integer(48),
+                        p_for_got_mean= numeric(48),
+                        p_for_got_med = numeric(48))
+
+str(trips)
+
+seasons <- as.factor(c("pre_laying","incubation", "chick_early", "chick_late"))
+
+levels(df.period$season) <- levels(seasons)
+
+
+years <- 2011:2013
+# For each year (3)
+i <- 2
+ix <- 1
+for(i in 1:3){
+  start_date <- as.POSIXct(paste(years[i], "-04-30 00:00:00", sep = ""), tz = "UTC")
+  
+  # For each date period in year (4)
+  # iz  
+  # iz <- 1
+  for(iz in 1:16){
+    
+    # add 6 days to get the end date
+    end_date <- start_date + 6*24*60*60
+    
+    # Trip filter
+    tf <- (trips_detailed$date_time > start_date) & (trips_detailed$date_time < end_date)
+    # summary(tf)
+    
+    df.period$year[ix] <- years[i]
+    if(iz <= 4){
+      df.period$season[ix] <- seasons[1]}else if(iz <= 8){
+        df.period$season[ix] <- seasons[2]} else if(iz <=12){
+          df.period$season[ix] <- seasons[3]} else {
+            df.period$season[ix] <- seasons[4]}
+    # df.period$season[ix] <- switch(floor(iz/4)+1, seasons[1], seasons[2], seasons[3])
+    df.period$date_mid[ix] <- start_date + 3*24*60*60
+    df.period$n_got[ix] <- sum(trips_detailed$class_3[tf] == "LAND", na.rm = TRUE)
+    df.period$n_mix[ix] <- sum(trips_detailed$class_3[tf] == "MIX", na.rm = TRUE)
+    df.period$n_sea[ix] <- sum(trips_detailed$class_3[tf] == "SEA", na.rm = TRUE)
+    df.period$n_tot[ix] <- length(trips_detailed$class_3[tf])
+    df.period$p_got[ix] <- df.period$n_got[ix]/df.period$n_tot[ix]
+    df.period$p_mix[ix] <- df.period$n_mix[ix]/df.period$n_tot[ix]
+    df.period$p_sea[ix] <- df.period$n_sea[ix]/df.period$n_tot[ix]
+    df.period$p_for_got_mean[ix] <- mean(trips_detailed$p_for_got[tf], na.rm = TRUE)
+    df.period$p_for_got_med[ix] <- median(trips_detailed$p_for_got[tf], na.rm = TRUE)
+    ix <- ix +1
+    start_date <- start_date + 5*24*60*60
+  }
+  
+}
+
+# New code
+library(ggplot2)
+library(scales)
+library(reshape2)
+
+gg_trips_period_df <- cbind.data.frame(df.period$year, df.period$date_mid,
+                                       df.period$p_got*100, df.period$p_mix*100,
+                                       df.period$p_sea*100)
+names(gg_trips_period_df) <- c("Year", "Date", "Land", "Mixed", "Sea")
+str(gg_trips_period_df)
+
+gg_trips_period_df$Date <- as.Date(paste("2011-", format(gg_trips_period_df$Date, "%m-%d"), sep = ""))
+
+gg_df_period_new <- melt(gg_trips_period_df, id.vars = c("Year", "Date"))
+
+gg_df_period_new[is.na(gg_df_period_new)]<- 0
+
+date.per <- as.numeric(c(as.Date("2011-05-20"),as.Date("2011-06-10"), as.Date("2011-07-01")))
+
+dpi <- 1000
+library(scales) # for date_breaks()
+# png("ggplot_prop_land_sea_sep_fig_2.png", , width = 10*dpi, height = 5*dpi, res = dpi)
+png("ggplot_prop_land_sea_mix_date_new_extended_sup.png", width = 10*dpi, height = 6*dpi, res = dpi)
+ggplot(gg_df_period_new, aes(x = Date, y = value, color = variable)) + 
+  # scale_x_date(date_minor_breaks = "5 day") +
+  geom_line(lwd = 1)+
+  scale_color_manual(values=c("dark green", "magenta", "dark blue")) +
+  facet_grid(Year ~ ., scale = "fixed") +
+  # ylim(0, 100) +
+  geom_vline(xintercept = date.per,
+             colour="dark grey", linetype = "longdash", lwd =1.5) +
+  scale_y_continuous(name="Proporition of trips (%)", breaks=seq(0,100,20),
+                     limits = c(0,100)) + 
+  # scale_x_continuous(name="Date") +
+  # scale_y_continuous() +
+  scale_x_date(breaks = date_breaks("10 day"),
+               minor_breaks = date_breaks("5 day"),
+               labels=date_format("%d-%b"))+
+  # date_labels = "%d-%b") +
+  # scale_x_date(date_labels = "%d-%b")+
+  # ylim(0,100)+
+  theme(axis.title = element_text(face="bold", size=18),
+        axis.text  = element_text(size = 12),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 14))
+# + geom_text(aes(x, y, label=labs, group=NULL),data=dat)
+# annotate("text", x = (c(as.Date("2011-05-30"))), y = 90, label = "Some text")
+
+dev.off()
+# getwd()
