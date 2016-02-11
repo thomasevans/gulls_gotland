@@ -4,6 +4,7 @@
 # Load trip data ------
 # Load in the filtered trip data (from trip_departure_decision_filter.R)
 load("foraging_trip_info_filtered_jan2016.RData")
+# load("foraging_trip_info_filtered_jan2016_ext.RData")
 
 # Take a sample ----
 # Take a sub-set of these for initial testing
@@ -89,5 +90,6 @@ out.df$turn_angle_deg <- deg.relangle
 
 
 save(out.df, file = "foraging_trip_info_filtered_jan2016_points_300s.RData")
+# save(out.df, file = "foraging_trip_info_filtered_jan2016_points_300s_ext.RData")
 
 write.csv(trips.f, file = "foraging_trip_info_filtered_jan2016_points_300s.csv")
