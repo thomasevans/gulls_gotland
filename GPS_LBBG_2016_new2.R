@@ -301,6 +301,9 @@ maxcorr.mer(stdz.model.12)
 
 
 # View random effect -----
+stdz.model.12<-standardize(mod.12, standardize.y=FALSE)
+
+
 sex.df <- unique(cbind.data.frame(trips$ring_number,trips$sex))
 sex.df <- sex.df[order(sex.df$`trips$ring_number`),]
 ran.ef <- ranef(stdz.model.12, condVar=TRUE)
@@ -318,16 +321,20 @@ names(rad.df) <- c("Ring_number", "Intercept", "CI", "Sex")
 
 ci_df <- data.frame(coef = (rad.df$Ring_number), rad.df$Intercept)
 
-
-
-lower_ci <- rad.df$Intercept-rad.df$CI
-upper_ci <- rad.df$Intercept+rad.df$CI
+ci_95 <- 2*sqrt(rad.df$CI)
+lower_ci <- rad.df$Intercept-ci_95
+upper_ci <- rad.df$Intercept+ci_95
 rad.df <- cbind.data.frame(rad.df, lower_ci, upper_ci)
 rad.df <- rad.df[order(rad.df$Intercept),]
 rad.df$Ring_number <- factor(rad.df$Ring_number, levels = unique(rad.df$Ring_number))
 
 library(lattice)
-lattice::dotplot(Ring_number ~ Intercept, rad.df, xlim = c(-5,5),
+
+dpi <- 1000
+library(scales) # for date_breaks()
+# png("ggplot_prop_land_sea_sep_fig_2.png", , width = 10*dpi, height = 5*dpi, res = dpi)
+png("intercept_individual_gps_mod_new.png", width = 10*dpi, height = 10*dpi, res = dpi)
+lattice::dotplot(Ring_number ~ Intercept, rad.df, xlim = c(-6,6),
                  #                  cexl.lab = 1.5, cex.axis = 1.5,
                  xlab = list("Effect (log-odds of terrestrial foraging)",cex=1.3),
                  panel = function(x, y) {
@@ -336,3 +343,4 @@ lattice::dotplot(Ring_number ~ Intercept, rad.df, xlim = c(-5,5),
                    panel.abline(v=0, lty=2)
                  },scales=list(y=list(cex=1.2), x = list(cex = 1.2))
 )
+dev.off()
