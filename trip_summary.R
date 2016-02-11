@@ -930,7 +930,7 @@ date.per <- as.numeric(c(as.Date("2011-05-20"),as.Date("2011-06-10"), as.Date("2
 dpi <- 1000
 library(scales) # for date_breaks()
 # png("ggplot_prop_land_sea_sep_fig_2.png", , width = 10*dpi, height = 5*dpi, res = dpi)
-png("ggplot_prop_land_sea_mix_date_new_extended_sup.png", width = 10*dpi, height = 6*dpi, res = dpi)
+png("ggplot_prop_land_sea_mix_date_new_extended_sup_alt.png", width = 10*dpi, height = 10*dpi, res = dpi)
 ggplot(gg_df_period_new, aes(x = Date, y = value, color = variable)) + 
   # scale_x_date(date_minor_breaks = "5 day") +
   geom_line(lwd = 1)+
@@ -949,6 +949,7 @@ ggplot(gg_df_period_new, aes(x = Date, y = value, color = variable)) +
   # date_labels = "%d-%b") +
   # scale_x_date(date_labels = "%d-%b")+
   # ylim(0,100)+
+  theme_bw() +
   theme(axis.title = element_text(face="bold", size=18),
         axis.text  = element_text(size = 12),
         legend.title = element_blank(),
