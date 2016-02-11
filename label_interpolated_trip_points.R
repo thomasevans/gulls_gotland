@@ -2,6 +2,9 @@
 
 # Load in data (from R binnary) ------
 load("foraging_trip_info_filtered_jan2016_points_300s.RData")
+# load("foraging_trip_info_filtered_jan2016_points_300s_ext.RData")
+
+plot(out.df$date_time)
 trip.points <- out.df
 trip.points$latitude <- trip.points$latitutde
 
@@ -32,38 +35,6 @@ col_dist <- deg.dist(trip.points$longitude,
                      17.970992,
                      57.278884,
                      km = FALSE)
-
-# # Visualise some of the above stuff
-# hist(col_dist/1000, xlim = c(0,100), breaks = 1000,
-#      xlab = "distance from colony (km)")
-# abline(v=3, lty = 2, lwd = 2, col = "red")
-# hist(p2p_dist, xlim = c(0,10000), breaks = 10000)
-# # hist(p2p_dist*1000, xlim = c(0,1000), breaks = 100000)
-# 
-# source("add_alpha.R")
-# speed_calc <- (p2p_dist/300)
-# plot(abs(trip.points$turn_angle_deg) ~ speed_calc, xlim = c(0,25),
-#      col = addalpha("black", alpha = 0.05) )
-# 
-# fx <- speed_calc >3
-# hist(abs(trip.points$turn_angle_deg[fx]), breaks = 36)
-# 
-# f <- col_dist > 3000
-# plot(abs(trip.points$turn_angle_deg[f]) ~ speed_calc[f], xlim = c(0,25),
-#      col = addalpha("black", alpha = 0.05) )
-# 
-# f <- 1000*p2p_dist > 150
-# plot(abs(trip.points$turn_angle_deg[f]) ~ speed_calc[f], xlim = c(0,25),
-#      col = addalpha("black", alpha = 0.2) )
-# 
-# hist(speed_calc[f & speed_calc >2], xlim = c(0,20), breaks = 10000)
-# abline(v = 2)
-# 
-# f2 <- f & speed_calc >2
-# plot(abs(trip.points$turn_angle_deg[f2]) ~ speed_calc[f2], xlim = c(0,25),
-#      col = addalpha("black", alpha = 0.1) )
-# hist(abs(trip.points$turn_angle_deg[f2]), breaks = 100)
-
 
 # Label by weather on land/ sea --------
 # see previous on gotland thing and the Fågelsundet land/sea script
@@ -97,4 +68,5 @@ summary(gotland_on_bool)
 trip.points.new <- cbind.data.frame(trip.points[c(1:2,7,4:6)], col_dist, gotland_on_bool, p2p_dist)
 
 save(trip.points.new, file = "trip_points_annotated.RData")
+# save(trip.points.new, file = "trip_points_annotated_ext.RData")
 
