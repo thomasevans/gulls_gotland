@@ -296,6 +296,12 @@ f7 <- (trips$start_time>="2011-05-20" & trips$start_time<="2011-07-21")| +
   (trips$start_time>="2012-05-20" & trips$start_time<="2012-07-21")| +
   (trips$start_time>="2013-05-20" & trips$start_time<="2013-07-21")
 
+# Trips from 20th May to 21st July only (for the 3 years of the study)
+# f7 <- (trips$start_time>="2011-04-30" & trips$start_time<="2011-07-21")| +
+#   (trips$start_time>="2012-04-30" & trips$start_time<="2012-07-21")| +
+#   (trips$start_time>="2013-04-30" & trips$start_time<="2013-07-21")
+# 
+
 
 # Combine these filters
 f <- f0 & f1 & f3 & f5 & f6 & f7
@@ -348,6 +354,7 @@ trips.f <- trips[f,]
 
 # Save as an R data file
 save(trips.f, file = "foraging_trip_info_filtered_jan2016.RData")
+# save(trips.f, file = "foraging_trip_info_filtered_jan2016_ext.RData")
 
 # Output to a csv file
 write.csv(trips.f, file = "foraging_trip_info_filtered_jan2016.csv")
