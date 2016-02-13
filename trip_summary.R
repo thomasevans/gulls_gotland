@@ -3,8 +3,8 @@
 
 
 # Load in trip point data ---
-load("trip_points_annotated.RData")
-# load("trip_points_annotated_ext.RData")
+# load("trip_points_annotated.RData")
+load("trip_points_annotated_ext.RData")
 
 # plot(trip.points.new$date_time)
 
@@ -649,8 +649,8 @@ ggplot(gg_df_period_new, aes(x = Date, y = value, color = variable)) +
 dev.off()
 
 # Prepare trip info for export ------
-
-
+years <- 2011:2013
+pre_laying.starts <- as.POSIXct(paste(years, "-04-30 00:00:00", sep = ""), tz = "UTC")
 incubation.starts <- as.POSIXct(paste(years, "-05-20 00:00:00", sep = ""), tz = "UTC")
 chick_rearing.starts <- as.POSIXct(paste(years, "-06-10 00:00:00", sep = ""), tz = "UTC") 
 chick_rearing_late.starts <- as.POSIXct(paste(years, "-07-01 00:00:00", sep = ""), tz = "UTC")
@@ -659,6 +659,7 @@ chick_rearing_late.ends <- as.POSIXct(paste(years, "-07-22 00:00:00", sep = ""),
 
 period <- rep(NA, nrow(trips_detailed))
 for(i in 1:3){
+  period[(trips_detailed$date_time > pre_laying.starts[i]) & (trips_detailed$date_time < incubation.starts[i])] <- "Pre_laying"
   period[(trips_detailed$date_time > incubation.starts[i]) & (trips_detailed$date_time < chick_rearing.starts[i])] <- "Incubation"
   period[(trips_detailed$date_time > chick_rearing.starts[i]) & (trips_detailed$date_time < chick_rearing_late.starts[i])] <- "Chick_1"
   period[(trips_detailed$date_time > chick_rearing_late.starts[i]) & (trips_detailed$date_time < chick_rearing_late.ends[i])] <- "Chick_2"
@@ -675,6 +676,7 @@ trips_detailed_new <- cbind(trips_detailed, period, years.trip)
 # ?write.csv
 write.csv(trips_detailed_new, file = "trips_details_2016_01_29.csv")
 
+# write.csv(trips_detailed_new, file = "trips_details_2016_01_29_extended.csv")
 
 
 # Time of day figure -----
