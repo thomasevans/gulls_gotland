@@ -107,13 +107,33 @@ hist(trips$duration_s[f & trips$duration_s < week])
 abline(v = c(day, day *2, day * 3, day *4, day *5),
        lty = 2, lwd = 2, col = "red")
 
+day_h <- day/((60*60))
 # View 5-days
-hist(trips$duration_s[f & trips$duration_s < 5*day],
-     ylim = c(0,200), breaks = 40)
-
+hist((trips$duration_s[f & trips$duration_s < 5*day]/(60*60)),
+     ylim = c(0,200), breaks = 40,
+     ylab = "N trips", xlab = "Duration of trip (h)")
 # Add lines for days
-abline(v = c(day, day *2, day * 3, day *4, day *5),
+abline(v = c(day_h, day_h *2, day_h * 3, day_h *4, day_h *5),
        lty = 2, lwd = 2, col = "red")
+
+win.metafile("trip_duration_filter.wmf", width = 14, height = 7)
+par(mfrow=c(1,2))
+hist((trips$duration_s[f]/(60*60)), breaks = 40,
+     ylab = "N trips", xlab = "Duration of trip (h)",
+     main = "All trips")
+# Add lines for days
+# abline(v = c(day_h, day_h *2, day_h * 3, day_h *4, day_h *5),
+#        lty = 2, lwd = 2, col = "red")
+
+hist((trips$duration_s[f & trips$duration_s < 5*day]/(60*60)), breaks = 40,
+     ylab = "N trips", xlab = "Duration of trip (h)",
+     main = "Trips <5 days")
+# Add lines for days
+abline(v = c(day_h, day_h *2, day_h * 3, day_h *4, day_h *5),
+       lty = 2, lwd = 2, col = "dark grey")
+abline(v = c(day_h *2),
+       lty = 2, lwd = 2, col = "red")
+dev.off()
 
 # 110000 appears a potentially good threshold
 abline(v = 110000,
@@ -122,7 +142,7 @@ abline(v = 110000,
 110000/day
 
 summary(trips$duration_s < 110000)
-summary(trips$duration_s < 2*day)
+summary(trips$duration_s[f] < 2*day)
 
 
 # 2-day is probably a bit long for regular trips, but it fits more with the distribution
@@ -193,6 +213,28 @@ abline(v = 3, lty = 2, lwd = 2, col = "red")
 
 
 
+win.metafile("trip_distance_filter.wmf", width = 14, height = 7)
+par(mfrow=c(1,2))
+hist(trips$dist_max[f], breaks = 20,
+     ylab = "N trips", xlab = "Max distance (km)",
+     main = "All trips")
+# Add lines for days
+# abline(v = c(day_h, day_h *2, day_h * 3, day_h *4, day_h *5),
+#        lty = 2, lwd = 2, col = "red")
+
+hist(trips$dist_max[f & trips$dist_max < 20], breaks = 40,
+     ylab = "N trips", xlab = "Max distance (km)",
+     main = "<20 km")
+# Add lines for days
+# abline(v = c(day_h, day_h *2, day_h * 3, day_h *4, day_h *5),
+       # lty = 2, lwd = 2, col = "dark grey")
+abline(v = c(3),
+       lty = 2, lwd = 2, col = "red")
+dev.off()
+
+
+
+
 f5 <- trips$dist_max > 3
 summary(f5)
 
@@ -231,6 +273,28 @@ abline(v = 0.25 * hour, lty = 2, lwd = 2, col = "blue")
 # for most trips this shouldn't miss too much.
 f6 <- trips$interval_max < 0.5 * hour
 summary(f6)
+
+
+
+win.metafile("trip_time_interval_filter.wmf", width = 14, height = 7)
+par(mfrow=c(1,2))
+hist(trips$interval_max[f & trips$interval_max < 24*hour]/60, breaks = 40,
+     ylab = "N trips", xlab = "Maximum time interval (mins)",
+     main = "All trips")
+
+
+hist(trips$interval_max[f & trips$interval_max < hour]/60, breaks = 40,
+     ylab = "N trips", xlab = "Maximum time interval (mins)",
+     main = "<1 h")
+# Add lines for days
+# abline(v = c(day_h, day_h *2, day_h * 3, day_h *4, day_h *5),
+# lty = 2, lwd = 2, col = "dark grey")
+abline(v = c(30),
+       lty = 2, lwd = 2, col = "red")
+dev.off()
+
+
+
 
 f <- f & f6
 summary(f)
