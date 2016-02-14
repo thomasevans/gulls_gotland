@@ -11,7 +11,7 @@ load("foraging_trip_info_filtered_jan2016.RData")
 # # Choose 10
 # trip.sample <- sample(trips.f$trip_id,10)
 # # for replication:
-trip.sample <- c(2345, 3108, 2937, 1306, 2107,   37,    3, 2188,  330,  275)
+trip.sample <- c(2345, 3108, 2937, 1306, 2107,   3, 2188,  330,  275)
 # 
 # # If we want to check what happens to trips with longer gaps
 # trip.sample <- trips.f$trip_id[trips.f$interval_max %in% rev(sort(trips.f$interval_max))[1:5]]
@@ -56,7 +56,7 @@ library("adehabitatLT")
 points_all_nona.ltraj <- as.ltraj(points_all_nona[,4:3], points_all_nona$date_time,
                                   points_all_nona$trip_id,
                                   burst = points_all_nona$trip_id, typeII = TRUE)
-
+vignette("adehabitatLT")
 # See how this looks
 # summary(points_all_nona.ltraj)
 # plot(points_all_nona.ltraj)
@@ -70,10 +70,13 @@ points_all_nona.ltraj <- as.ltraj(points_all_nona[,4:3], points_all_nona$date_ti
 # Try 300 s initially
 points_all_nona.ltraj.300 <- redisltraj(points_all_nona.ltraj, 300, type = "time")
 
+win.metafile("trips_original.wmf", width = 7, height = 7)
+plot(points_all_nona.ltraj[c(1,2,8,6)])
+dev.off()
 
-plot(points_all_nona.ltraj)
-plot(points_all_nona.ltraj.300)
-
+win.metafile("trips_300s_int.wmf", width = 7, height = 7)
+plot(points_all_nona.ltraj.300[c(1,2,8,6)])
+dev.off()
 # Convert data back to data.frame ----
 points_all_nona_300s <- ld(points_all_nona.ltraj.300)
 
