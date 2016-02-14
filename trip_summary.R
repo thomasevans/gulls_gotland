@@ -38,6 +38,23 @@ abline(v = 1500, lwd = 2, lty = 2, col = "red")
 abline(v = 20, lwd = 2, lty = 2, col = "red")
 dev.off()
 
+
+win.metafile("gps_move_distance.wmf", width = 14, height = 7)
+par(mfrow=c(1,2))
+hist(trip.points.new$p2p_dist[trip.points.new$p2p_dist <10000]/1000, breaks = 50,
+     xlab = "Distance in 5 min (km)",
+     ylab = "N interpolated GPS locations",
+     main = "All GPS locations")
+abline(v = 1.5, lwd = 2, lty = 2, col = "red")
+hist(trip.points.new$p2p_dist[trip.points.new$p2p_dist <200], breaks = 50,
+     xlab = "Distance in 5 min (m)",
+     ylab = "N interpolated GPS locations",
+     main = "<200 m")
+abline(v = 20, lwd = 2, lty = 2, col = "red")
+dev.off()
+
+1500/300
+20/300
 # 
 # hist(trip.points.new$p2p_dist, xlim = c(0,1000), breaks = 80000)
 # hist(trip.points.new$p2p_dist, xlim = c(0,5000), breaks = 80000)
@@ -60,6 +77,21 @@ abline(v = 3, lwd = 2, lty = 2, col = "red")
 # abline(v = 20, lwd = 2, lty = 2, col = "red")
 dev.off()
 
+
+win.metafile("gps_col_dist.wmf", width = 14, height = 7)
+par(mfrow=c(1,2))
+hist(trip.points.new$col_dist/1000, xlim = c(0,150), breaks = 100,
+     xlab = "Distance from colony (km)",
+     ylab = "N interpolated GPS locations",
+     main = "All locations")
+
+hist(trip.points.new$col_dist[trip.points.new$col_dist < 10000]/1000,
+     xlim = c(0,10), breaks = 50,
+     xlab = "Distance from colony (km)",
+     ylab = "N interpolated GPS locations",
+     main = "<10 km")
+abline(v = 3, lwd = 2, lty = 2, col = "red")
+dev.off()
 
 
 # For each trip ---
