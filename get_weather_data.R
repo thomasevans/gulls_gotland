@@ -14,8 +14,10 @@ help("RNCEP")
 # Weather data (we use 'NCEP-DOE Reanalysis 2', option 'reanalysis2 = TRUE')
 
 # Load trip data
-trips <- read.csv("trips_details_2016_01_29.csv", header = TRUE)
+# trips <- read.csv("trips_details_2016_01_29.csv", header = TRUE)
+trips <- read.csv("trips_details_2016_01_29_extended.csv", header = TRUE)
 
+# trips.prelaying <- trips[trips$,]
 
 # Check date_time format
 date_time <- as.POSIXct(trips$start_time, tz = "utc")
@@ -223,7 +225,7 @@ str(weather.data)
 
 
 # Output data frame (table)
-write.csv(weather.data, file = "weather.data_20160203.csv", 
+write.csv(weather.data, file = "weather.data_20160216_ext.csv", 
           row.names = FALSE)
 
 
@@ -231,5 +233,5 @@ write.csv(weather.data, file = "weather.data_20160203.csv",
 # Merge with trip_info table
 trips.info <- merge(trips, weather.data, "trip_id")
 
-write.csv(trips.info, file = "trips_details_2016_01_29_detailed.csv", 
+write.csv(trips.info, file = "trips_details_2016_02_16_detailed_extended.csv", 
           row.names = FALSE)
