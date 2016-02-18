@@ -67,6 +67,8 @@ trips$sex<-trips$sex_tentative
 
 #do some stuff, install/load required packages
 
+summary(trips$ring_number)
+
 library(lme4)
 library(MuMIn)
 library(arm)
