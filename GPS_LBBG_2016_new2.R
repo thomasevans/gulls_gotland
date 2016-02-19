@@ -211,8 +211,8 @@ library(Rcpp)
 library(arm)
 library(MuMIn)
 
-mod.12<-glmer(got_eps~stage+cloud+temp+sunrise_prox+(1|ring_number),family=binomial(link='logit'), data=trips)
-summary(mod.12)
+mod.18<-glmer(got_eps~cloud+temp+sunrise_prox+(1|ring_number),family=binomial(link='logit'), data=trips)
+summary(mod.18)
 
 stdz.model7<-standardize(mod.12, standardize.y=FALSE)
 stdz.model.12<-standardize(mod.12, standardize.y=FALSE)
@@ -314,12 +314,12 @@ maxcorr.mer(stdz.model.12)
 
 
 # View random effect -----
-stdz.model.12<-standardize(mod.12, standardize.y=FALSE)
+stdz.model.18<-standardize(mod.18, standardize.y=FALSE)
 
 
 sex.df <- unique(cbind.data.frame(trips$ring_number,trips$sex))
 sex.df <- sex.df[order(sex.df$`trips$ring_number`),]
-ran.ef <- ranef(stdz.model.12, condVar=TRUE)
+ran.ef <- ranef(stdz.model.18, condVar=TRUE)
 # str(ran.df)
 
 rad.df <- ran.ef[[1]]
@@ -347,6 +347,7 @@ dpi <- 1000
 library(scales) # for date_breaks()
 # png("ggplot_prop_land_sea_sep_fig_2.png", , width = 10*dpi, height = 5*dpi, res = dpi)
 png("intercept_individual_gps_mod_new.png", width = 10*dpi, height = 10*dpi, res = dpi)
+pdf("intercept_individual_gps_mod_new.pdf", width = 10, height = 10)
 lattice::dotplot(Ring_number ~ Intercept, rad.df, xlim = c(-6,6),
                  #                  cexl.lab = 1.5, cex.axis = 1.5,
                  xlab = list("Effect (log-odds of terrestrial foraging)",cex=1.3),
