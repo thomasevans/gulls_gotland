@@ -95,7 +95,7 @@ BBMM2 <- brownian.bridge(x = points$longitude[points.sub2],
                         location.error = 0.05, 
                         cell.size = 0.05)
 
-cont.levels <- c(seq(25, 75, by = 25), 90, 95, 99)
+cont.levels <- c(seq(25, 75, by = 25), 90, 95)
 contours <- bbmm.contour(BBMM, levels= cont.levels, plot = TRUE)
 points(x = points$longitude[points.sub], y = points$latitutde[points.sub])
 
@@ -191,7 +191,7 @@ addalpha <- function(colors, alpha=1.0) {
 
 
 points(x = points$longitude[points.sub2], y = points$latitutde[points.sub2],
-       cex = 0.2, col = addalpha("black", alpha = 0.3),
+       cex = 0.2, col = addalpha("black", alpha = 0.2),
        lwd = 0.4)
 
 plot(gadm, col = NA, bg = NA, lwd = 1, add = TRUE,
