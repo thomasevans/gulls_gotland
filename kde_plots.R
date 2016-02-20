@@ -72,10 +72,11 @@ date_time_period_fun <- function(x){
 }
 # x <- (points$date_time[1])
 points$stage_2 <- sapply(points$date_time, date_time_period_fun)
-
-points.sub <- (points$dist_max < 200) & (points$ring_number == 8114315)
-points.sub <- (points$dist_max < 200)
-points.sub <- (points$dist_max < 200) & (points$coldist > 3)
+# summary(as.factor(points$stage_2))
+# points.sub <- (points$dist_max < 200) & (points$ring_number == 8114315)
+# points.sub <- (points$dist_max < 200)
+points.sub <- (points$dist_max < 200) & (points$coldist > 3) & (points$stage_2 == "early")
+points.sub2 <- (points$dist_max < 200) & (points$coldist > 3) & (points$stage_2 == "late")
 
 
 # range(points$dist_max)
@@ -129,14 +130,15 @@ library(maps)
 load("SWE_adm0.RData")
 
 
-pdf("map_thing.pdf", width = 5, height = 8)
+pdf("map_thing.pdf", width = 10, height = 8)
 par(mfrow=c(1,2))
 par(mar = c(5, 4, 4, 2))
 
 plot(gadm, col= "grey40", bg = "white",
      lty = 0,
      xlim = c(17,19.2),
-     ylim = c(55.7,58.5))
+     ylim = c(55.7,58.5),
+     main = "Pre-laying and incubation")
 
 # Alpha channel ----
 addalpha <- function(colors, alpha=1.0) {
@@ -149,7 +151,7 @@ addalpha <- function(colors, alpha=1.0) {
 
 
 points(x = points$longitude[points.sub], y = points$latitutde[points.sub],
-       cex = 0.2, col = addalpha("black", alpha = 0.2),
+       cex = 0.2, col = addalpha("black", alpha = 0.3),
        lwd = 0.4)
 
 plot(gadm, col = NA, bg = NA, lwd = 1, add = TRUE,
@@ -175,7 +177,8 @@ map.scale(ratio = FALSE,
 plot(gadm, col= "grey40", bg = "white",
      lty = 0,
      xlim = c(17,19.2),
-     ylim = c(55.7,58.5))
+     ylim = c(55.7,58.5),
+     main = "Chick rearing")
 
 # Alpha channel ----
 addalpha <- function(colors, alpha=1.0) {
@@ -187,8 +190,8 @@ addalpha <- function(colors, alpha=1.0) {
 }
 
 
-points(x = points$longitude[points.sub], y = points$latitutde[points.sub],
-       cex = 0.2, col = addalpha("black", alpha = 0.2),
+points(x = points$longitude[points.sub2], y = points$latitutde[points.sub2],
+       cex = 0.2, col = addalpha("black", alpha = 0.3),
        lwd = 0.4)
 
 plot(gadm, col = NA, bg = NA, lwd = 1, add = TRUE,
@@ -197,7 +200,7 @@ plot(gadm, col = NA, bg = NA, lwd = 1, add = TRUE,
 # lwd.lines <- c(1:length(cont.levels))
 # lwd.lines <- max(lwd.lines)/c(1:length(cont.levels))
 # lwd.lines <- (lwd.lines/max(lwd.lines))*2.5
-plot(raster.contour, add = TRUE, col = addalpha("red", alpha = 0.6),
+plot(raster.contour2, add = TRUE, col = addalpha("red", alpha = 0.6),
      lwd = seq(1, 3, 2/length(cont.levels)))
 # lty = c(1:length(cont.levels)))
 
