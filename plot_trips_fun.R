@@ -98,15 +98,15 @@ plot.trips <- function(long = NA, lat = NA, trip_ids = NA,
     segments(long[fx][-1], lat[fx][-1],
              long[fx][1:n-1], lat[fx][1:n-1],
              col = col.vec.al.rand[i], lty = 1, lwd = 2)
-    col.sym <- addalpha(c("light blue","dark green",
+    col.sym <- addalpha(c("dark blue","dark green",
                           "dark grey", "light grey"), alpha = 0.5)
-    col.sea <- addalpha("light blue", alpha = 0.8)
+    # col.sea <- addalpha("light blue", alpha = 0.8)
     points(long[other_points & fx], lat[other_points & fx],
            bg = col.sym[3], col = col.sym[4], cex = 0.6, pch = 21, lwd = 0.5)
     points(long[for_points_got & fx], lat[for_points_got & fx],
             bg = col.sym[2], col = col.sym[4], cex = 0.8, pch = 21, lwd = 0.5)
     points(long[for_points_sea & fx], lat[for_points_sea & fx],
-           bg = col.sea, col = col.sym[4], cex = 0.8, pch = 21, lwd = 0.5)
+           bg = col.sym[1], col = col.sym[4], cex = 0.8, pch = 21, lwd = 0.5)
 
   }
   map.scale(ratio = FALSE,
