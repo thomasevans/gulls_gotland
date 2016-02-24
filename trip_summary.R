@@ -248,7 +248,7 @@ source("plot_trips_fun.R")
 
 
 
-f <- (p_gotland_over_3km_1ms_sub3move >= 0.0 & p_gotland_over_3km_1ms_sub3move <= 0.05)
+f <- (p_gotland_over_3km_1ms_sub3move >= 0.2 & p_gotland_over_3km_1ms_sub3move <= 0.8)
 
 f2 <- trip.points.new$col_dist > 3000 & trip.points.new$p2p_dist < 1500 &
   trip.points.new$p2p_dist > 20  & trip.points.new$gotland_on_bool
@@ -256,8 +256,17 @@ f2 <- trip.points.new$col_dist > 3000 & trip.points.new$p2p_dist < 1500 &
 f3 <- trip.points.new$col_dist > 3000 & trip.points.new$p2p_dist < 1500 &
   trip.points.new$p2p_dist > 20  & !trip.points.new$gotland_on_bool
 
+# marine trips
+# 2728 2559 2342 2000 3308 1639 3113  347 3116 1305
 
+# Land trips
+# 54 2449   79 2245 1393 3259 1368  710  500   24
+# 1592 1441  272 1726  957  476 1591  986 2353  260
+# 2719 1357 1968 1573 2091 1361 1439 1394 1564 2266
 trip_ids <- unique(trips$trip_id_int[f])
+
+# Mixed (range 20 - 80 %)
+# 2757 2241 2275 1320   12 3264 1760 1754 1365 2953
 
 # If too many trips to plot, plot a sample
 # if(length(trip_ids > 8)){
@@ -272,12 +281,13 @@ points_other <- (!f2 & !f3 & points.f)[points.f]
 
 # summary(for_points)
 dpi = 1000
-png("example_trips_sea_0.05less_3.png", width = 5*dpi, height = 8*dpi, res = dpi)
-# pdf("example_trips_new.pdf", width = 5, height = 8)
-# postscript("example_trips_new.eps", width = 5, height = 8, horizontal = FALSE, onefile = FALSE)
+png("example_trips_land_0.2_0.8_mixed_1.png", width = 5*dpi, height = 8*dpi, res = dpi)
+# cairo_ps(filename = "example_trips_land_0.95more_4.ps", width = 5, height = 8)
+# pdf("example_trips_sea_0.05less_4.pdf", width = 5, height = 8)
+# postscript("example_trips_sea_0.05less_4.eps", width = 5, height = 8, horizontal = FALSE, onefile = FALSE)
 # library(devEMF)
 # emf(file="example_trips_new.emf", bg="white", width=5, height=8, family="Calibri", pointsize=20)
-# win.metafile(filename = "example_trips_new.wmf", width = 5, height = 8, pointsize = 12,
+# win.metafile(filename = "example_trips_sea_0.05less_4.wmf", width = 5, height = 8, pointsize = 12,
 #              restoreConsole = TRUE)
 plot.trips(long = trip.points.new$longitude[points.f],
            lat = trip.points.new$latitude[points.f],
@@ -346,7 +356,7 @@ hist(p_oth)
 hist(p_sea)
 hist(p_got)
 
-rank_trip <- order(p_for_got, -(p_sea), p_got)
+rank_trip <- order(-p_for_got, -(p_got), (p_sea))
 rank_id <- 1:length(rank_trip)
 
 gg_df <- cbind.data.frame(p_got,p_sea,p_oth)
@@ -355,8 +365,8 @@ gg_df <- gg_df[rank_trip,]
 gg_df <- cbind.data.frame(rank_id,gg_df)
 
 gg_df_new <- melt(gg_df, id=c("rank_id"))
-gg_df_new$variable <-  factor(gg_df_new$variable, levels = c("p_sea","p_oth","p_got"))
-levels(gg_df_new$variable) <- c("Sea", "Other", "Land")
+gg_df_new$variable <-  factor(gg_df_new$variable, levels = c("p_got","p_oth","p_sea"))
+levels(gg_df_new$variable) <- c("Land","Other","Sea")
 
 # ?melt
 
@@ -365,11 +375,13 @@ library(scales)
 
 gg_df_new$value <- gg_df_new$value*100
 dpi <- 1000
-png("ggplot_prop_land_sea_sep_fig_2.png", , width = 10*dpi, height = 5*dpi, res = dpi)
+png("ggplot_prop_land_sea_sep_fig_NEW.png", , width = 10*dpi, height = 5*dpi, res = dpi)
+
+win.metafile("ggplot_prop_land_sea_sep_fig_NEW.wmf",width=10, height=5)
 ggplot(gg_df_new, aes(x = rank_id, y = value, fill = variable, order=variable)) +
   geom_bar(stat = "identity", width = 1) +
-  facet_grid(Year ~ ., scale = "fixed") +
-  scale_fill_manual(values=c("light blue"," dark grey","dark green")) +
+  # facet_grid(Year ~ ., scale = "fixed") +
+  scale_fill_manual(values=c("dark green"," dark grey","dark blue")) +
   # geom_vline(xintercept = c(711,803), colour="red", linetype = "longdash", lwd =1.5) +
   scale_y_continuous(name="Proportion of foraging trip (%)", breaks=seq(0,100,20)) + 
   scale_x_continuous(name="Trip (rank order)") +
