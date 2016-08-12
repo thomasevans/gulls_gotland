@@ -1239,3 +1239,65 @@ ggplot(gg_df_period_new, aes(x = Date, y = value, color = variable)) +
 
 dev.off()
 # getwd()
+
+
+# plot trip classification figure ------
+load("trip_summary_data.RData")
+
+source("plot_trips_fun.R")
+
+
+
+f <- (p_gotland_over_3km_1ms_sub3move >= 0.2 & p_gotland_over_3km_1ms_sub3move <= 0.8)
+
+f2 <- trip.points.new$col_dist > 3000 & trip.points.new$p2p_dist < 1500 &
+  trip.points.new$p2p_dist > 20  & trip.points.new$gotland_on_bool
+
+f3 <- trip.points.new$col_dist > 3000 & trip.points.new$p2p_dist < 1500 &
+  trip.points.new$p2p_dist > 20  & !trip.points.new$gotland_on_bool
+
+# marine trips
+# 2728 2559 2342 2000 3308 1639 3113  347 3116 1305
+
+# Land trips
+# 54 2449   79 2245 1393 3259 1368  710  500   24
+# 1592 1441  272 1726  957  476 1591  986 2353  260
+# 2719 1357 1968 1573 2091 1361 1439 1394 1564 2266
+trip_ids <- unique(trips$trip_id_int[f])
+
+# inspect.trips <- trips[f,]
+# Mixed (range 20 - 80 %)
+# 2757 2241 2275 1320   12 3264 1760 1754 1365 2953
+
+# If too many trips to plot, plot a sample
+# if(length(trip_ids > 8)){
+# trip_ids <- sample(trip_ids,10)
+# }
+trip_id <- trip_ids[60]
+
+points.f <- trip.points.new$trip_id == trip_id
+# summary(points.f)
+for_points_got <- (f2 & points.f)[points.f]
+for_points_sea <- (f3 & points.f)[points.f]
+points_other <- (!f2 & !f3 & points.f)[points.f]
+
+# summary(for_points)
+dpi = 1000
+png("example_trips_land_0.2_0.8_mixed_example_gotland.png", width = 6*dpi, height = 6*dpi, res = dpi)
+cairo_ps(filename = "example_trips_land_0.2_0.8_mixed_example_gotland.ps", width = 6, height = 6)
+# pdf("example_trips_sea_0.05less_4.pdf", width = 5, height = 8)
+# postscript("example_trips_sea_0.05less_4.eps", width = 5, height = 8, horizontal = FALSE, onefile = FALSE)
+# library(devEMF)
+# emf(file="example_trips_new.emf", bg="white", width=5, height=8, family="Calibri", pointsize=20)
+# win.metafile(filename = "example_trips_sea_0.05less_4.wmf", width = 5, height = 8, pointsize = 12,
+#              restoreConsole = TRUE)
+plot.trips(long = trip.points.new$longitude[points.f],
+           lat = trip.points.new$latitude[points.f],
+           trip_ids = trip.points.new$trip_id[points.f],
+           for_points_got =  for_points_got,
+           for_points_sea =  for_points_sea,
+           other_points = points_other,
+           gotland_poly = TRUE)
+
+dev.off()
+# plot(1:10)

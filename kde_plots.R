@@ -130,7 +130,8 @@ library(maps)
 load("SWE_adm0.RData")
 
 
-pdf("map_thing.pdf", width = 10, height = 8)
+# pdf("map_thing.pdf", width = 10, height = 8)
+png("aditional_file_5_PNG.png", width = 10, height = 8, units = "i", res= 300)
 par(mfrow=c(1,2))
 par(mar = c(5, 4, 4, 2))
 
